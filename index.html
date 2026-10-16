@@ -612,6 +612,7 @@ button { cursor: pointer; }
       <div id="r-card" class="t-card" role="img" aria-label="">
         <canvas id="r-card-canvas" width="750" height="1050"></canvas>
       </div>
+      <button id="btn-try" class="btn btn-primary type-top" type="button" hidden>あなたも診断する（40問・約5分）</button>
       <button id="btn-type-top" class="btn btn-ghost type-top" type="button" hidden>トップに戻る</button>
       <p class="sr-only"><span id="rc-code"></span> <span id="rc-name"></span> <span id="rc-catch"></span></p>
     </div>
@@ -2070,6 +2071,10 @@ button { cursor: pointer; }
   /** 出題順を差し替える（window.CARDNA.app.ORDER の参照を保つため配列は作り直さない） */
   function setOrder(ids) { ORDER.length = 0; Array.prototype.push.apply(ORDER, ids); }
 
+  function clearSharedQuery() {
+    if (!/[?&]r=/.test(location.search)) return;
+    try { history.replaceState(null, "", location.pathname + location.hash); } catch (e) {}
+  }
   function clearProgress() {
     state.answers = {}; state.index = 0;
     setOrder(S.buildOrder(D.QUESTIONS, D.AXES, D.QUESTION_ORDER));
@@ -2355,7 +2360,8 @@ button { cursor: pointer; }
     if (!t) { renderTop(); return; }
     var f = familyOf(r.code);
     var isDiagnosis = !!r.axes;
-    lastResult = isDiagnosis ? r : lastResult;
+    var isShared = !!r.shared;               // 他の人から送られた結果リンク
+    lastResult = isDiagnosis && !isShared ? r : lastResult;
 
     var root = document.documentElement;
     // 結果画面の色をタイプごとに切り替える（カードの配色と同じ data/cards.js から）
@@ -2367,7 +2373,7 @@ button { cursor: pointer; }
     root.style.setProperty("--t-accent", st.accent);
     $("screen-result").dataset.layout = st.layout;
 
-    $("r-eyebrow").textContent = isDiagnosis ? "あなたのカードゲーマータイプは" : "タイプ解説";
+    $("r-eyebrow").textContent = isShared ? "友達のカードゲーマータイプは" : (isDiagnosis ? "あなたのカードゲーマータイプは" : "タイプ解説");
     $("rc-code").textContent = r.code;
     $("rc-name").textContent = t.name;
     $("rc-catch").textContent = "「" + t.catch + "」";
@@ -2381,6 +2387,7 @@ button { cursor: pointer; }
     $("r-stats-box").hidden = !isDiagnosis;
     if (isDiagnosis) renderStats(r.code, r.axes);
     $("btn-type-top").hidden = isDiagnosis;
+    $("btn-try").hidden = !isShared;
 
     $("r-desc").textContent = t.desc;
     $("r-aruaru").innerHTML = listHTML(t.aruaru);
@@ -2394,16 +2401,21 @@ button { cursor: pointer; }
     renderRelation("r-inspire", t.inspiredBy);
 
     // 診断結果のときだけシェア。タイプ解説では「診断する」を出す
-    $("share-box").hidden = !isDiagnosis;
-    if (isDiagnosis) { setupShare(); }
-    $("btn-retry").textContent = isDiagnosis ? "最初から診断し直す" : (lastResult ? "自分の結果に戻る" : "診断する");
-    $("btn-retry").dataset.mode = isDiagnosis ? "retry" : (lastResult ? "mine" : "start");
+    $("share-box").hidden = !isDiagnosis || isShared;
+    if (isDiagnosis && !isShared) { setupShare(); }
+    if (isShared) {
+      $("btn-retry").textContent = lastResult ? "自分の結果を見る" : "あなたも診断する";
+      $("btn-retry").dataset.mode = lastResult ? "mine" : "start";
+    } else {
+      $("btn-retry").textContent = isDiagnosis ? "最初から診断し直す" : (lastResult ? "自分の結果に戻る" : "診断する");
+      $("btn-retry").dataset.mode = isDiagnosis ? "retry" : (lastResult ? "mine" : "start");
+    }
 
     show("result");
     var card = $("r-card");
     spinAngle = 0; card.style.transition = "none"; card.style.transform = "";
     card.classList.remove("reveal", "drawn");
-    if (animate) { void card.offsetWidth; card.classList.add(isDiagnosis ? "drawn" : "reveal"); }
+    if (animate) { void card.offsetWidth; card.classList.add(isDiagnosis && !isShared ? "drawn" : "reveal"); }
   }
 
   function viewType(code) {
@@ -2459,6 +2471,36 @@ button { cursor: pointer; }
   /** LINE で開いたときにアプリ内ブラウザではなく通常のブラウザで開くよう、URLに目印を付ける */
   function forLine(url) { return url ? url + (url.indexOf("?") === -1 ? "?" : "&") + "openExternalBrowser=1" : url; }
 
+  /**
+   * 結果つきのURL：?r=タイプ&p=4軸の左側の割合（例 ?r=ALSG&p=61-23-69-82）
+   * 開いた人には「友達の結果」として表示し、その下から診断を始められる
+   */
+  function resultUrl(r) {
+    var url = siteUrl();
+    if (!url || !r || !r.axes) return url;
+    return url + "?r=" + r.code + "&p=" + r.axes.map(function (a) { return a.leftPct; }).join("-");
+  }
+  /** URLの ?r= &p= から、表示用の結果を組み立てる（不正な値なら null） */
+  function sharedFromUrl() {
+    var q;
+    try { q = new URLSearchParams(location.search); } catch (e) { return null; }
+    var pcts = (q.get("p") || "").split("-").map(Number);
+    if (pcts.length !== D.AXES.length || pcts.some(function (n) { return !isFinite(n) || n < 0 || n > 100; })) return null;
+    var axes = D.AXES.map(function (ax, i) {
+      var leftPct = Math.round(pcts[i]), isLeft = leftPct >= 50;
+      var shown = leftPct / 50 - 1;                        // -1〜+1（表示用カーブ後の値）
+      var max = D.QUESTIONS.filter(function (qq) { return qq.axis === ax.id; }).length * 2;
+      var score = Math.round((shown < 0 ? -1 : 1) * shown * shown * max);
+      var side = isLeft ? ax.left : ax.right, absShown = Math.abs(shown), strength = "僅差";
+      for (var k = 0; k < S.STRENGTH_LEVELS.length; k++) { if (absShown >= S.STRENGTH_LEVELS[k].min) { strength = S.STRENGTH_LEVELS[k].label; break; } }
+      return { id: ax.id, title: ax.title, score: score, max: max, letter: side.letter, side: isLeft ? "left" : "right",
+        sideLabel: side.label, leftPct: leftPct, rightPct: 100 - leftPct, dominantPct: isLeft ? leftPct : 100 - leftPct,
+        strength: strength, left: ax.left, right: ax.right };
+    });
+    var code = axes.map(function (a) { return a.letter; }).join("");
+    if (!D.TYPES[code]) return null;
+    return { code: code, axes: axes, type: D.TYPES[code], shared: true };
+  }
   function shareText(r, line) {
     var lines = [
       "私のカードゲーマータイプは【" + r.code + "｜" + r.type.name + "】でした！",
@@ -2467,7 +2509,7 @@ button { cursor: pointer; }
     ];
     var tags = (CFG.HASHTAGS || []).map(function (h) { return "#" + h; }).join(" ");
     if (tags) lines.push(tags);
-    var url = siteUrl();
+    var url = resultUrl(r);
     if (url) lines.push(line ? forLine(url) : url);
     return lines.join("\n");
   }
@@ -2579,7 +2621,7 @@ button { cursor: pointer; }
 
   /** リンクを共有：スマホは共有メニュー、使えなければURLをコピー */
   function shareLink() {
-    var r = lastResult, url = siteUrl();
+    var r = lastResult, url = resultUrl(r);
     if (!url) { $("copy-status").textContent = "公開URLで開いたときに使えます。"; return; }
     track("share_link", { code: r ? r.code : "" });
     var title = "CARDNA（カードナ）カードゲーマー診断";
@@ -2637,7 +2679,14 @@ button { cursor: pointer; }
     });
     $("r-good").addEventListener("click", function () { viewType(this.dataset.code); });
     $("r-inspire").addEventListener("click", function () { viewType(this.dataset.code); });
+    $("btn-try").addEventListener("click", function () {
+      clearSharedQuery(); track("shared_try", {});
+      if (answeredCount() > 0 && answeredCount() < TOTAL) { startQuiz(false); return; }
+      if (lastResult) { renderResult(lastResult, true); return; }
+      startQuiz(true);
+    });
     $("btn-retry").addEventListener("click", function () {
+      clearSharedQuery();
       var mode = this.dataset.mode;
       if (mode === "mine" && lastResult) { renderResult(lastResult, true); return; }
       if (mode === "retry") { track("retry", {}); clearProgress(); lastResult = null; }
@@ -2694,6 +2743,8 @@ button { cursor: pointer; }
     load();
     if (answeredCount() === TOTAL) lastResult = S.diagnose(state.answers, D);
     if (routeHash()) return;
+    var shared = sharedFromUrl();
+    if (shared) { track("shared_open", { code: shared.code }); renderResult(shared, true); return; }
     if (state.screen === "result" && lastResult) renderResult(lastResult, false);
     else if (state.screen === "quiz") { show("quiz"); renderQuestion(null); }
     else renderTop();
