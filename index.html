@@ -4,14 +4,14 @@
 <meta property="og:site_name" content="CARDNA（カードナ）">
 <meta property="og:title" content="CARDNA（カードナ）｜カードゲーマー16タイプ診断">
 <meta property="og:description" content="あなたは、どんなカードゲーマー？ 40問・約5分でわかる16タイプ診断">
-<meta property="og:url" content="https://cardna.vercel.app/">
-<meta property="og:image" content="https://cardna.vercel.app/ogp.png">
+<meta property="og:url" content="https://cardna-shindan.vercel.app/">
+<meta property="og:image" content="https://cardna-shindan.vercel.app/ogp.png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
 <meta name="twitter:card" content="summary_large_image">
 <meta name="twitter:title" content="CARDNA（カードナ）｜カードゲーマー16タイプ診断">
 <meta name="twitter:description" content="あなたは、どんなカードゲーマー？ 40問・約5分でわかる16タイプ診断">
-<meta name="twitter:image" content="https://cardna.vercel.app/ogp.png">
+<meta name="twitter:image" content="https://cardna-shindan.vercel.app/ogp.png">
 <title>CARDNA（カードナ）｜カードゲーマー16タイプ診断</title>
 <style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -354,6 +354,7 @@ button { cursor: pointer; }
 
 .invite { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
 .invite .btn { min-height: 52px; font-size: 15.5px; padding: 10px 16px; }
+.invite .invite-x { grid-column: 1 / -1; }
 .invite-status { grid-column: 1 / -1; margin: 0; min-height: 1.2em; text-align: center; }
 
 .r-actions { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
@@ -474,6 +475,7 @@ button { cursor: pointer; }
       </div>
       <p class="hero-note">所要時間 約5分 ・ 回答はこの端末の中だけで計算されます</p>
       <div id="invite-top" class="invite" hidden>
+        <a class="btn btn-dark invite-x" target="_blank" rel="noopener">Xでこの診断をシェア</a>
         <a class="btn btn-line invite-line" target="_blank" rel="noopener">友達にLINEで送る</a>
         <button class="btn btn-ghost invite-copy" type="button">URLをコピー</button>
         <p class="invite-status r-small" role="status"></p>
@@ -663,7 +665,7 @@ button { cursor: pointer; }
 
   root.CARDNA.CONFIG = {
     /** 公開URL。設定するとシェア文に自動で付きます（空なら付けない） */
-    SITE_URL: "https://cardna.vercel.app/",
+    SITE_URL: "",
     /** シェア文に付けるハッシュタグ（# なし） */
     HASHTAGS: ["CARDNA", "カードゲーマー診断"],
     /** localStorage のキー。データ構造を大きく変えたら v を上げる */
@@ -2351,6 +2353,13 @@ button { cursor: pointer; }
       box.hidden = !url;
       if (!url) return;
       box.querySelector(".invite-line").href = "https://line.me/R/share?text=" + encodeURIComponent(inviteText());
+      var xBtn = box.querySelector(".invite-x");
+      if (xBtn) {
+        var tags = (CFG.HASHTAGS || []).map(function (h) { return "#" + h; }).join(" ");
+        var xText = "カードゲーマー向け16タイプ診断「CARDNA（カードナ）」\nあなたは、どんなカードゲーマー？🃏 40問・約5分でわかるよ\n" + url + (tags ? "\n" + tags : "");
+        xBtn.href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(xText);
+        xBtn.addEventListener("click", function () { track("invite_x", { from: id }); });
+      }
       box.querySelector(".invite-line").addEventListener("click", function () { track("invite_line", { from: id }); });
       box.querySelector(".invite-copy").addEventListener("click", function () {
         var status = box.querySelector(".invite-status");
