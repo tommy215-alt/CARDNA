@@ -1,0 +1,2622 @@
+<!doctype html><html lang="ja"><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="カードゲーマー向け16タイプ診断。40問・約5分で、あなたのプレイスタイルを4文字のタイプと8つのステータスで判定します。">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="CARDNA（カードナ）">
+<meta property="og:title" content="CARDNA（カードナ）｜カードゲーマー16タイプ診断">
+<meta property="og:description" content="あなたは、どんなカードゲーマー？ 40問・約5分でわかる16タイプ診断">
+<meta property="og:url" content="https://cardna.vercel.app/">
+<meta property="og:image" content="https://cardna.vercel.app/ogp.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="CARDNA（カードナ）｜カードゲーマー16タイプ診断">
+<meta name="twitter:description" content="あなたは、どんなカードゲーマー？ 40問・約5分でわかる16タイプ診断">
+<meta name="twitter:image" content="https://cardna.vercel.app/ogp.png">
+<title>CARDNA（カードナ）｜カードゲーマー16タイプ診断</title>
+<style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@500&family=Dela+Gothic+One&family=Zen+Kaku+Gothic+New:wght@400;700;900&display=swap">
+<style>
+/* =========================================================
+   CARDNA — スタイル
+   レイアウト方針：スマホ1カラム（最大幅 560px）を中心に、
+   黒い枠線とずらし影の「ステッカー×トレカ」調で統一する。
+   ライトのみの単一テーマ（意図的）。
+   ========================================================= */
+:root {
+  color-scheme: light;
+  /* color */
+  --paper: #F3F4F7;      /* ページ地：わずかに青寄りの白 */
+  --surface: #FFFFFF;
+  --ink: #16161D;        /* 文字・枠線 */
+  --muted: #5C5F6E;
+  --hair: #D9DBE3;
+  --accent: #FFC83D;     /* ステッカーの黄 */
+  --fam: #2A5BD7;        /* 結果タイプの属性色（JSで上書き） */
+  --fam-ink: #FFFFFF;
+  /* type */
+  --f-display: "Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --f-body: "Zen Kaku Gothic New", "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic", "Meiryo", sans-serif;
+  --f-mono: "DM Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  /* shape */
+  --bw: 2.5px;
+  --r: 14px;
+  --shadow: 4px 4px 0 var(--ink);
+  --shadow-sm: 3px 3px 0 var(--ink);
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--f-body);
+  font-size: 16px;
+  line-height: 1.75;
+  -webkit-font-smoothing: antialiased;
+}
+button, a { font: inherit; color: inherit; }
+button { cursor: pointer; }
+:focus-visible { outline: 3px solid var(--fam); outline-offset: 3px; }
+.mono { font-family: var(--f-mono); font-variant-numeric: tabular-nums; }
+[hidden] { display: none !important; }
+
+#app {
+  max-width: 560px;
+  margin: 0 auto;
+  padding-inline: 18px;
+  padding-block: 0 48px;
+}
+.screen { display: flex; flex-direction: column; }
+
+/* ---------- ボタン ---------- */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  min-height: 56px; padding: 12px 22px;
+  border: var(--bw) solid var(--ink); border-radius: 999px;
+  background: var(--surface); color: var(--ink);
+  font-weight: 900; font-size: 17px; letter-spacing: .04em;
+  text-decoration: none; box-shadow: var(--shadow);
+  transition: transform .08s ease, box-shadow .08s ease;
+  -webkit-tap-highlight-color: transparent;
+}
+.btn:active { transform: translate(3px, 3px); box-shadow: 1px 1px 0 var(--ink); }
+.btn-primary { background: var(--accent); }
+.btn-dark { background: var(--ink); color: #fff; }
+.btn-line { background: #06C755; color: #fff; }
+.btn-ghost { background: var(--surface); }
+.btn-text { border-color: transparent; box-shadow: none; background: transparent; text-decoration: underline; text-underline-offset: 4px; font-weight: 700; }
+.btn-text:active { transform: none; }
+.btn-xl { min-height: 66px; font-size: 21px; width: 100%; }
+
+/* ---------- トップ ---------- */
+.hero { display: flex; flex-direction: column; align-items: center; text-align: center; padding-block: 28px 8px; gap: 14px; }
+
+.fan { position: relative; width: 210px; height: 178px; margin-bottom: 4px; }
+.fan-card {
+  position: absolute; left: 50%; bottom: 0; width: 108px; height: 150px;
+  margin-left: -54px; border: var(--bw) solid var(--ink); border-radius: 12px;
+  box-shadow: var(--shadow-sm); transform-origin: 50% 120%;
+}
+.back {
+  background:
+    radial-gradient(circle at 50% 50%, var(--accent) 0 15px, transparent 16px),
+    repeating-linear-gradient(45deg, var(--ink) 0 6px, #2c2c36 6px 12px);
+}
+.back::after {
+  content: ""; position: absolute; inset: 7px; border: 1.5px solid rgba(255,255,255,.35); border-radius: 7px;
+}
+.c1 { transform: rotate(-16deg) translateX(-26px); }
+.c2 { transform: rotate(16deg) translateX(26px); }
+.c3 {
+  background: var(--surface); transform: rotate(0deg) translateY(-8px);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  animation: float 3.6s ease-in-out infinite;
+}
+.fan-q { font-family: var(--f-display); font-size: 62px; line-height: 1; }
+.fan-mini { font-family: var(--f-mono); font-size: 9px; letter-spacing: .06em; color: var(--muted); }
+@keyframes float { 0%,100% { transform: translateY(-8px); } 50% { transform: translateY(-14px) rotate(-1.5deg); } }
+
+.brand { margin: 0; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.brand-mark {
+  font-family: var(--f-display); font-size: 40px; line-height: 1.05; letter-spacing: .06em;
+  background: var(--ink); color: #fff; padding: 2px 14px 4px; border-radius: 8px; transform: rotate(-2deg);
+}
+.brand-d { color: var(--accent); }
+.brand-sub { font-family: var(--f-mono); font-size: 11px; letter-spacing: .22em; margin-top: 8px; }
+.hero-title {
+  margin: 6px 0 0; font-family: var(--f-display); font-weight: 400;
+  font-size: clamp(24px, 7.4vw, 40px); line-height: 1.32; text-wrap: balance;
+}
+.nowrap { white-space: nowrap; }
+.hero-lead { margin: 0; font-weight: 700; font-size: 16px; }
+.hero-actions { width: 100%; display: flex; flex-direction: column; gap: 14px; margin-top: 10px; }
+.resume .btn { width: 100%; }
+.hero-note { margin: 4px 0 0; font-size: 12.5px; color: var(--muted); }
+
+.section-label {
+  margin: 0 0 12px; font-size: 13px; font-weight: 900; letter-spacing: .12em;
+  display: inline-block; background: var(--ink); color: #fff; padding: 2px 10px; border-radius: 4px;
+}
+.axes-intro, .types-wrap { margin-top: 40px; }
+.axes-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.axes-list li {
+  display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; align-items: center;
+  background: var(--surface); border: var(--bw) solid var(--ink); border-radius: var(--r); padding: 12px 14px;
+}
+.ax-pair { font-family: var(--f-display); font-size: 22px; letter-spacing: .04em; grid-row: span 2; min-width: 66px; text-align: center; }
+.ax-pair span { color: var(--muted); font-size: 16px; padding-inline: 3px; }
+.ax-title { font-weight: 900; font-size: 15px; }
+.ax-poles { font-size: 13px; color: var(--muted); line-height: 1.5; min-width: 0; }
+
+.types-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.mini {
+  display: flex; flex-direction: column; text-align: left; padding: 0; overflow: hidden;
+  background: var(--surface); border: var(--bw) solid var(--ink); border-radius: 12px; box-shadow: var(--shadow-sm);
+  transition: transform .1s ease;
+}
+.mini:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.mini-top { display: flex; justify-content: space-between; align-items: center; padding: 6px 10px; color: #fff; }
+.mini-code { font-family: var(--f-display); font-size: 17px; letter-spacing: .06em; }
+.mini-fam { font-size: 10.5px; font-weight: 700; opacity: .92; }
+.mini-body { padding: 8px 10px 10px; display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.mini-name { font-family: var(--f-display); font-size: 19px; line-height: 1.3; }
+.mini-catch { font-size: 11.5px; line-height: 1.5; color: var(--muted); }
+
+.site-foot { margin-top: 40px; font-size: 12px; color: var(--muted); text-align: center; }
+
+/* ---------- 質問 ---------- */
+.quiz-bar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  display: grid; grid-template-columns: auto 1fr; align-items: center; gap: 10px 12px;
+  background: var(--paper); padding-block: 14px 12px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 4px; min-height: 44px; padding: 6px 14px 6px 8px;
+  border: var(--bw) solid var(--ink); border-radius: 999px; background: var(--surface); font-weight: 700; font-size: 15px;
+}
+.btn-back:active { background: var(--hair); }
+.progress-num { justify-self: end; font-size: 20px; font-weight: 500; }
+.quiz-bar { grid-template-columns: auto 1fr auto; }
+.btn-pause { justify-self: center; min-height: 40px; padding: 4px 12px; border: 2px solid var(--ink); border-radius: 999px; background: var(--surface); font-weight: 700; font-size: 13px; white-space: nowrap; }
+.btn-pause:active { background: var(--hair); }
+.resume-note { margin: 0; font-size: 12.5px; color: var(--muted); text-align: center; }
+.progress-num .slash { color: var(--muted); padding-inline: 4px; }
+#q-total { color: var(--muted); }
+.progress { grid-column: 1 / -1; height: 14px; border: var(--bw) solid var(--ink); border-radius: 999px; background: var(--surface); overflow: hidden; }
+.progress-fill { height: 100%; width: 0; background: var(--accent); border-right: var(--bw) solid var(--ink); transition: width .25s ease; }
+.progress-fill[style*="width: 0%"] { border-right: 0; }
+
+.quiz-body { display: flex; flex-direction: column; gap: 22px; padding-top: 8px; }
+.q-card {
+  position: relative; background: var(--surface); border: var(--bw) solid var(--ink); border-radius: 18px;
+  box-shadow: var(--shadow); padding: 22px 20px 26px; min-height: 196px;
+  display: flex; flex-direction: column; gap: 12px;
+}
+.q-card::before {
+  content: ""; position: absolute; inset: 7px; border: 1.5px dashed var(--hair); border-radius: 12px; pointer-events: none;
+}
+.q-no { margin: 0; font-size: 14px; letter-spacing: .1em; color: var(--muted); }
+.q-text { margin: 0; font-size: clamp(19px, 5.4vw, 23px); font-weight: 900; line-height: 1.6; text-wrap: pretty; }
+.q-card.enter { animation: deal .26s cubic-bezier(.2,.8,.3,1); }
+.q-card.enter-back { animation: dealBack .26s cubic-bezier(.2,.8,.3,1); }
+@keyframes deal { from { transform: translateX(28px) rotate(2deg); opacity: .2; } to { transform: none; opacity: 1; } }
+@keyframes dealBack { from { transform: translateX(-28px) rotate(-2deg); opacity: .2; } to { transform: none; opacity: 1; } }
+
+.choices { display: flex; flex-direction: column; gap: 10px; }
+.choice {
+  display: grid; grid-template-columns: 34px 1fr; align-items: center; gap: 12px;
+  min-height: 58px; padding: 8px 16px; text-align: left;
+  border: var(--bw) solid var(--ink); border-radius: 14px; background: var(--surface);
+  font-weight: 700; font-size: 16.5px; box-shadow: var(--shadow-sm);
+  -webkit-tap-highlight-color: transparent; transition: background .12s ease, transform .08s ease;
+}
+.choice:active { transform: translate(2px, 2px); box-shadow: 1px 1px 0 var(--ink); }
+.dot { justify-self: center; border: var(--bw) solid var(--ink); border-radius: 50%; background: var(--surface); }
+.choice[data-v="2"] .dot, .choice[data-v="-2"] .dot { width: 30px; height: 30px; }
+.choice[data-v="1"] .dot, .choice[data-v="-1"] .dot { width: 23px; height: 23px; }
+.choice[data-v="0"] .dot { width: 16px; height: 16px; }
+.choice[data-v="2"] .dot, .choice[data-v="1"] .dot { background: var(--accent); }
+.choice[data-v="-1"] .dot, .choice[data-v="-2"] .dot { background: var(--hair); }
+.choice.selected { background: var(--ink); color: #fff; }
+.choice.selected .dot { border-color: #fff; }
+.choices.locked { pointer-events: none; }
+
+@media (hover: hover) {
+  .choice:hover { background: #FFF6DA; }
+  .choice.selected:hover { background: var(--ink); }
+  .mini:hover { transform: translateY(-2px); }
+}
+
+/* ---------- 結果 ---------- */
+.r-eyebrow { margin: 26px 0 14px; text-align: center; font-weight: 900; font-size: 15px; letter-spacing: .06em; }
+/* 結果のステージ：タイプの配色で塗った帯の上にカードを置く（色はタイプごとに app.js が設定） */
+.r-stage {
+  display: flex; flex-direction: column; align-items: center; gap: 16px;
+  margin-inline: -18px; padding: 22px 18px 34px;
+  background: var(--t-fg, var(--ink)); color: var(--t-bg, #fff);
+  border-bottom: var(--bw) solid var(--ink);
+  perspective: 1200px;
+}
+.r-stage .r-eyebrow { margin: 0; color: inherit; }
+.r-stage .type-top { margin-top: 10px; width: min(100%, 340px); color: var(--ink); }
+
+/* 結果カード：描画は js/card.js（canvas）。ここは置き方だけ */
+.t-card {
+  position: relative; width: min(100%, 340px); max-width: 100%; aspect-ratio: 750 / 1050;
+  border-radius: 3.5% / 2.5%;
+  box-shadow: 6px 6px 0 var(--t-accent, var(--accent)), 6px 6px 0 2.5px var(--ink);
+}
+.t-card canvas { display: block; width: 100%; height: 100%; border-radius: inherit; backface-visibility: hidden; -webkit-backface-visibility: hidden; }
+.t-card { transform-style: preserve-3d; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+/* 裏面：トップのデッキと同じカード裏 */
+.t-card::after {
+  content: ""; position: absolute; inset: 0; border-radius: inherit; border: var(--bw) solid var(--ink);
+  background:
+    radial-gradient(circle at 50% 50%, var(--accent) 0 34px, transparent 35px),
+    repeating-linear-gradient(45deg, var(--ink) 0 10px, #2c2c36 10px 20px);
+  transform: rotateY(180deg); backface-visibility: hidden; -webkit-backface-visibility: hidden;
+}
+.tap-hint { margin: -4px 0 0; font-size: 12px; font-weight: 700; opacity: .75; }
+.t-card.reveal { animation: flipIn .6s cubic-bezier(.2,.75,.25,1.1); }
+@keyframes flipIn {
+  0% { transform: rotateY(-180deg) scale(.9); }
+  100% { transform: rotateY(0) scale(1); }
+}
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+
+.r-actions-top { display: grid; grid-template-columns: 1.6fr 1fr; gap: 10px; margin-top: 24px; }
+.r-actions-top .btn { width: 100%; padding-inline: 12px; }
+.r-content { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+.r-block {
+  background: var(--surface); border: var(--bw) solid var(--ink); border-radius: var(--r);
+  padding: 16px 18px 18px; min-width: 0;
+}
+.r-h {
+  margin: 0 0 10px; font-size: 15px; font-weight: 900; letter-spacing: .04em;
+  display: flex; align-items: center; gap: 8px;
+}
+.r-h::before { content: ""; width: 10px; height: 10px; background: var(--fam); border: 2px solid var(--ink); transform: rotate(45deg); flex: none; }
+.r-desc, .r-text { margin: 0; font-size: 15.5px; }
+.r-desc { white-space: pre-line; } /* 段落は空行で区切る */
+.r-two { display: grid; gap: 14px; }
+.r-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; font-size: 15px; line-height: 1.6; }
+.r-list li { display: grid; grid-template-columns: 22px 1fr; gap: 8px; }
+.r-list li::before { font-family: var(--f-display); font-size: 15px; line-height: 1.55; text-align: center; }
+.r-list.plus li::before { content: "+"; color: var(--fam); }
+.r-list.note li::before { content: "!"; color: var(--muted); }
+.aruaru { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.aruaru li {
+  background: #FFF6DA; border: 2px solid var(--ink); border-radius: 12px 12px 12px 3px;
+  padding: 8px 12px; font-weight: 700; font-size: 14.5px; line-height: 1.55;
+}
+.r-small { margin: 8px 0 0; font-size: 12.5px; color: var(--muted); }
+
+
+/* ---------- 8角形ステータス ---------- */
+.radar-wrap { display: grid; justify-items: center; gap: 10px; }
+.radar { width: 100%; max-width: 340px; height: auto; overflow: visible; }
+.radar .ring { fill: none; stroke: var(--hair); stroke-width: 1.5; }
+.radar .ring.outer { stroke: var(--ink); stroke-width: 2.5; }
+.radar .spoke { stroke: var(--hair); stroke-width: 1.5; }
+.radar .area { fill: var(--fam); fill-opacity: .38; stroke: var(--fam); stroke-width: 3; stroke-linejoin: round; transform-origin: 160px 150px; }
+.radar .pt { fill: var(--surface); stroke: var(--ink); stroke-width: 2; }
+.radar .lbl { font-family: var(--f-body); font-weight: 900; font-size: 13px; fill: var(--ink); }
+.radar .val { font-family: var(--f-mono); font-size: 11.5px; fill: var(--muted); }
+.radar .lbl.top, .radar .val.top { fill: var(--fam); }
+.radar-area-anim { animation: radarIn .7s cubic-bezier(.2,.8,.3,1.1); }
+@keyframes radarIn { from { transform: scale(.1); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+.stat-grid { list-style: none; margin: 0; padding: 0; width: 100%; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.stat-grid li { display: grid; grid-template-columns: 1fr auto auto; align-items: center; gap: 6px; padding: 6px 10px; border: 2px solid var(--ink); border-radius: 10px; background: var(--paper); font-size: 13.5px; font-weight: 700; min-width: 0; }
+.stat-grid .s-name { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.stat-grid .s-num { font-family: var(--f-mono); font-size: 13px; }
+.stat-grid .s-rank { font-family: var(--f-display); font-size: 15px; width: 26px; text-align: center; border: 2px solid var(--ink); border-radius: 6px; line-height: 1.35; background: var(--surface); }
+.stat-grid .s-rank.S { background: var(--accent); }
+.stat-grid .s-rank.A { background: #FFE9A8; }
+.stat-best { margin: 0; width: 100%; font-size: 14.5px; font-weight: 700; background: #FFF6DA; border: 2px solid var(--ink); border-radius: 12px; padding: 8px 12px; line-height: 1.6; }
+.stat-best b { color: var(--fam); }
+.gauges { display: grid; gap: 16px; }
+.g-row { display: grid; gap: 6px; }
+.g-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 13px; }
+.g-title { font-weight: 900; }
+.g-strength { font-size: 12px; font-weight: 700; padding: 1px 8px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--paper); white-space: nowrap; }
+.g-strength.strong { background: var(--accent); }
+.g-poles { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 8px; }
+.g-pole { display: flex; flex-direction: column; line-height: 1.25; min-width: 0; }
+.g-pole.right { text-align: right; align-items: flex-end; }
+.g-pole b { font-family: var(--f-display); font-weight: 400; font-size: 20px; }
+.g-pole small { font-size: 12px; font-weight: 700; color: var(--muted); }
+.g-pole.win small { color: var(--ink); }
+.g-pole:not(.win) b { color: var(--muted); }
+.g-pct { font-family: var(--f-mono); font-size: 13px; }
+.g-bar {
+  position: relative; height: 18px; border: var(--bw) solid var(--ink); border-radius: 999px; overflow: hidden;
+  background: var(--hair);
+}
+.g-fill { position: absolute; inset: 0 auto 0 0; background: var(--fam); }
+.g-bar::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; border-left: 2px dashed var(--ink); opacity: .55; }
+.g-score { font-size: 11.5px; color: var(--muted); text-align: center; }
+
+.opp {
+  width: 100%; display: flex; align-items: center; gap: 12px; text-align: left;
+  border: 2px solid var(--ink); border-radius: 12px; background: var(--paper); padding: 10px 12px;
+}
+.opp-code { font-family: var(--f-display); font-size: 20px; padding: 2px 8px; border-radius: 6px; color: #fff; border: 2px solid var(--ink); }
+.opp-name { font-weight: 900; }
+.opp-go { margin-left: auto; font-size: 13px; color: var(--muted); white-space: nowrap; }
+
+.rel-list { display: grid; gap: 14px; }
+.rel { display: grid; gap: 6px; min-width: 0; }
+.rel-label { margin: 0; font-size: 12.5px; font-weight: 900; letter-spacing: .06em; color: var(--muted); }
+.rel-note { margin: 0; font-size: 14px; line-height: 1.6; }
+
+.invite { width: 100%; display: grid; grid-template-columns: 1fr auto; gap: 10px; }
+.invite .btn { min-height: 52px; font-size: 15.5px; padding: 10px 16px; }
+.invite-status { grid-column: 1 / -1; margin: 0; min-height: 1.2em; text-align: center; }
+
+.r-actions { display: flex; flex-direction: column; gap: 14px; margin-top: 28px; }
+.r-actions .btn { width: 100%; }
+
+/* ---------- シェアシート ---------- */
+.sheet { position: fixed; inset: 0; z-index: 50; display: flex; align-items: flex-end; justify-content: center; }
+.sheet-backdrop { position: absolute; inset: 0; background: rgba(22, 22, 29, .55); }
+.sheet-body {
+  position: relative; width: 100%; max-width: 560px; max-height: 92%; overflow-y: auto;
+  background: var(--paper); border: var(--bw) solid var(--ink); border-bottom: 0; border-radius: 22px 22px 0 0;
+  padding: 16px 18px calc(22px + env(safe-area-inset-bottom, 0px));
+  display: flex; flex-direction: column; gap: 12px;
+  animation: sheetUp .22s ease-out;
+}
+@keyframes sheetUp { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
+.sheet-body > * { flex-shrink: 0; } /* 縦に詰まって重ならないように */
+.sheet-head { display: flex; justify-content: space-between; align-items: center; }
+.sheet-head h2 { margin: 0; font-size: 18px; font-weight: 900; }
+.sheet-close { width: 44px; height: 44px; border: var(--bw) solid var(--ink); border-radius: 50%; background: var(--surface); font-size: 22px; line-height: 1; }
+.share-img-box { display: flex; flex-direction: column; align-items: center; }
+.share-img-box img { width: auto; max-width: min(100%, 300px); max-height: 46vh; border: 2px solid var(--ink); border-radius: 10px; box-shadow: var(--shadow-sm); }
+.share-buttons { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.share-buttons .wide { grid-column: 1 / -1; }
+.share-inline { display: flex; flex-direction: column; gap: 12px; margin-top: 22px; }
+.share-inline .r-h { margin-bottom: 0; }
+.share-inline .share-img-box img { max-height: 340px; max-width: min(100%, 260px); }
+.share-format { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: var(--bw) solid var(--ink); border-radius: 999px; overflow: hidden; }
+.fmt { min-height: 42px; border: 0; background: var(--surface); font-weight: 900; font-size: 14px; }
+.fmt + .fmt { border-left: var(--bw) solid var(--ink); }
+.fmt[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.share-hint { margin: 0; }
+.save-top-status { margin: 8px 0 0; text-align: center; min-height: 1.2em; }
+.share-buttons .btn { min-height: 50px; font-size: 15px; padding: 10px 12px; }
+
+.share-text {
+  width: 100%; font: inherit; font-size: 13px; line-height: 1.6; resize: none;
+  border: 2px solid var(--ink); border-radius: 10px; padding: 8px 10px; background: var(--surface); color: var(--ink);
+}
+.copy-status { margin: 0; min-height: 1.4em; font-size: 13px; font-weight: 700; text-align: center; }
+
+@media (min-width: 520px) {
+  .types-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .r-two { grid-template-columns: 1fr 1fr; }
+}
+
+
+/* ---------- 診断中の演出（約3秒）→ デッキから1枚引く ---------- */
+.diag { position: fixed; inset: 0; z-index: 60; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 26px;
+  background: var(--paper); padding: 24px; }
+.diag.out { animation: diagOut .35s ease forwards; }
+@keyframes diagOut { to { opacity: 0; } }
+.deck { position: relative; width: 150px; height: 210px; }
+.deck .dk { position: absolute; inset: 0; border: var(--bw) solid var(--ink); border-radius: 14px; box-shadow: var(--shadow-sm); }
+.deck .dk:nth-child(1) { transform: translate(10px, 10px) rotate(4deg); }
+.deck .dk:nth-child(2) { transform: translate(5px, 5px) rotate(-3deg); }
+.deck .dk:nth-child(3) { transform: translate(2px, 2px) rotate(1.5deg); }
+.deck .dk.top { transform: none; }
+.diag.busy .dk.top { animation: shuffle .5s ease-in-out infinite alternate; }
+@keyframes shuffle { from { transform: translateX(-4px) rotate(-1.5deg); } to { transform: translateX(4px) rotate(1.5deg); } }
+.diag.draw .dk.top { animation: drawOut 1.5s cubic-bezier(.3,.7,.3,1) forwards; }
+@keyframes drawOut {
+  0%   { transform: none; }
+  18%  { transform: translateY(-58px) rotate(-6deg) scale(1.03); }
+  /* ここから溜め：持ち上げたまま小刻みに震える */
+  30%  { transform: translateY(-64px) rotate(-8deg) scale(1.05); }
+  38%  { transform: translateY(-62px) rotate(-6.5deg) scale(1.05); }
+  46%  { transform: translateY(-66px) rotate(-9deg) scale(1.06); }
+  54%  { transform: translateY(-63px) rotate(-6.5deg) scale(1.06); }
+  62%  { transform: translateY(-68px) rotate(-9.5deg) scale(1.07); }
+  70%  { transform: translateY(-64px) rotate(-7deg) scale(1.07); }
+  76%  { transform: translateY(-74px) rotate(-10deg) scale(1.08); }
+  100% { transform: translateY(-46vh) rotate(-14deg) scale(1.15); opacity: 0; }
+}
+.diag.draw .deck::after { content: ""; position: absolute; inset: -30px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(255,200,61,.55), transparent 65%); animation: charge 1.2s ease-in forwards; z-index: -1; }
+@keyframes charge { from { opacity: 0; transform: scale(.6); } to { opacity: 1; transform: scale(1.3); } }
+.diag-title { margin: 0; font-family: var(--f-display); font-size: 30px; letter-spacing: .08em; }
+.diag-title .dots::after { content: ""; animation: dots 1.2s steps(4) infinite; }
+@keyframes dots { 0% { content: ""; } 25% { content: "."; } 50% { content: ".."; } 75% { content: "..."; } }
+.diag-meter { width: min(100%, 340px); display: grid; gap: 8px; }
+.diag-meter .progress { height: 18px; }
+.diag-remain { margin: 0; text-align: center; font-weight: 900; font-size: 16px; }
+.diag-remain .mono { font-size: 22px; padding-inline: 2px; }
+.diag-step { margin: 0; text-align: center; font-size: 13px; color: var(--muted); min-height: 1.4em; }
+/* 結果カード：デッキから引いて、表に返す */
+.t-card.drawn { animation: drawIn .75s cubic-bezier(.2,.75,.25,1.08); }
+@keyframes drawIn {
+  0%   { transform: translateY(60vh) rotate(-14deg) rotateY(180deg) scale(.6); }
+  55%  { transform: translateY(-14px) rotate(3deg) rotateY(90deg) scale(1.03); }
+  100% { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
+
+</style>
+
+<div id="app">
+
+  <!-- ================= トップ ================= -->
+  <section id="screen-top" class="screen" aria-labelledby="top-title">
+    <div class="hero">
+      <div class="fan" aria-hidden="true">
+        <div class="fan-card back c1"></div>
+        <div class="fan-card back c2"></div>
+        <div class="fan-card face c3"><span class="fan-q">?</span><span class="fan-mini">A/F L/E S/C G/X</span></div>
+      </div>
+      <p class="brand"><span class="brand-mark" aria-label="CARDNA">CAR<span class="brand-d">D</span>NA</span><span class="brand-sub">CARD GAMER DNA ・ カードナ</span></p>
+      <h1 id="top-title" class="hero-title">あなたは、<br><span class="nowrap">どんなカードゲーマー？</span></h1>
+      <p class="hero-lead">40問であなたのカードゲームスタイルを診断</p>
+      <div class="hero-actions">
+        <button id="btn-start" class="btn btn-primary btn-xl" type="button">診断する</button>
+        <div id="resume-box" class="resume" hidden>
+          <button id="btn-resume" class="btn btn-ghost" type="button">続きから再開 <span id="resume-progress" class="mono"></span></button>
+          <p id="resume-note" class="resume-note">途中までの回答は保存されています</p>
+        </div>
+      </div>
+      <p class="hero-note">所要時間 約5分 ・ 回答はこの端末の中だけで計算されます</p>
+      <div id="invite-top" class="invite" hidden>
+        <a class="btn btn-line invite-line" target="_blank" rel="noopener">友達にLINEで送る</a>
+        <button class="btn btn-ghost invite-copy" type="button">URLをコピー</button>
+        <p class="invite-status r-small" role="status"></p>
+      </div>
+    </div>
+
+    <div class="axes-intro">
+      <h2 class="section-label">4つの軸で診断</h2>
+      <ul id="axes-list" class="axes-list"></ul>
+    </div>
+
+    <div class="types-wrap">
+      <h2 class="section-label">全16タイプ</h2>
+      <div id="types-grid" class="types-grid"></div>
+    </div>
+
+    <footer class="site-foot">
+      <p>CARDNAはカードゲームを楽しむためのエンタメ診断です。人格を判定するものではありません。</p>
+    </footer>
+  </section>
+
+  <!-- ================= 質問 ================= -->
+  <section id="screen-quiz" class="screen" hidden aria-live="polite">
+    <header class="quiz-bar">
+      <button id="btn-back" class="btn-back" type="button" aria-label="前の質問に戻る">
+        <svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M15 5l-7 7 7 7" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span>戻る</span>
+      </button>
+      <button id="btn-pause" class="btn-pause" type="button">中断して保存</button>
+      <div class="progress-num mono"><span id="q-current">1</span><span class="slash">/</span><span id="q-total">40</span></div>
+      <div class="progress" role="progressbar" aria-label="回答の進み具合" aria-valuemin="0" aria-valuemax="40" aria-valuenow="0" id="progress"><div id="progress-fill" class="progress-fill"></div></div>
+    </header>
+
+    <div class="quiz-body">
+      <article id="q-card" class="q-card">
+        <p class="q-no mono" id="q-no">Q.01</p>
+        <p class="q-text" id="q-text"></p>
+      </article>
+      <div id="choices" class="choices" role="group" aria-label="回答"></div>
+    </div>
+  </section>
+
+  <!-- ================= 結果 / タイプ解説 ================= -->
+  <section id="screen-result" class="screen" hidden>
+    <div class="r-stage">
+      <p id="r-eyebrow" class="r-eyebrow">あなたのカードゲーマータイプは</p>
+      <!-- 結果カード：js/card.js が canvas に描く（シェア画像と同じ描画・配色は data/cards.js） -->
+      <div id="r-card" class="t-card" role="img" aria-label="">
+        <canvas id="r-card-canvas" width="750" height="1050"></canvas>
+      </div>
+      <button id="btn-type-top" class="btn btn-ghost type-top" type="button" hidden>トップに戻る</button>
+      <p class="sr-only"><span id="rc-code"></span> <span id="rc-name"></span> <span id="rc-catch"></span></p>
+    </div>
+
+    <div class="r-actions-top" hidden>
+    </div>
+
+    <section id="share-box" class="r-block share-inline">
+      <h2 id="share-title" class="r-h">結果をシェア</h2>
+        <div class="share-format" role="group" aria-label="画像のサイズ">
+          <button type="button" class="fmt" data-fmt="post" aria-pressed="true">投稿用 4:5</button>
+          <button type="button" class="fmt" data-fmt="story" aria-pressed="false">ストーリーズ用 9:16</button>
+        </div>
+        <div class="share-img-box">
+          <img id="share-img" alt="診断結果カードの画像" hidden>
+          <p id="share-img-status" class="r-small">画像を作成中…</p>
+        </div>
+        <p class="r-small share-hint" id="share-img-hint" hidden>保存ボタンが使えないときは、画像を長押し（パソコンは右クリック）して保存できます。</p>
+        <p class="r-small share-hint" id="inapp-note" hidden>LINEやXのアプリ内で開いていると、保存や共有がうまく動かないことがあります。右上のメニューから「ブラウザで開く」を選ぶと確実です。</p>
+        <div class="share-buttons">
+          <button id="btn-save" class="btn btn-primary wide" type="button">画像を保存</button>
+          <a id="share-x" class="btn btn-dark" target="_blank" rel="noopener">Xでポスト</a>
+          <button id="btn-link" class="btn btn-ghost" type="button">リンクを共有</button>
+          <a id="share-line" class="btn btn-line wide" target="_blank" rel="noopener">LINEで送る</a>
+          <button id="btn-native-share" class="btn btn-ghost wide" type="button" hidden>画像付きでほかのアプリに共有（X・インスタなど）</button>
+          <button id="btn-copy" class="btn btn-ghost wide" type="button">シェア文をコピー</button>
+        </div>
+        <p id="copy-status" class="copy-status" role="status"></p>
+        <p class="r-small share-hint">Xは文章とリンクで投稿します（リンクのプレビュー画像付き）。結果カードの画像も付けたいときは、先に「画像を保存」してから投稿画面で添付してください。</p>
+        <textarea id="share-text" class="share-text" readonly rows="5" aria-label="シェア文"></textarea>
+    </section>
+
+    <div class="r-content">
+      <section id="r-stats-box" class="r-block">
+        <h2 id="r-stats-h" class="r-h">ゲーマーステータス</h2>
+        <div class="radar-wrap">
+          <div id="r-radar" style="width:100%;display:flex;justify-content:center"></div>
+          <p id="r-stat-best" class="stat-best"></p>
+          <ul id="r-stat-grid" class="stat-grid"></ul>
+          <p id="r-stat-note" class="r-small">※ 40問の回答から算出したステータスです</p>
+        </div>
+      </section>
+
+      <section id="r-gauges-box" class="r-block">
+        <h2 class="r-h">4つの軸</h2>
+        <div id="r-gauges" class="gauges"></div>
+      </section>
+
+      <section class="r-block">
+        <h2 class="r-h">あなたの特徴</h2>
+        <p id="r-desc" class="r-desc"></p>
+      </section>
+
+      <section class="r-block">
+        <h2 class="r-h">このタイプのあるある</h2>
+        <ul id="r-aruaru" class="aruaru"></ul>
+      </section>
+
+      <div class="r-two">
+        <section class="r-block">
+          <h2 class="r-h">あなたの強み</h2>
+          <ul id="r-strengths" class="r-list plus"></ul>
+        </section>
+        <section class="r-block">
+          <h2 class="r-h">注意点</h2>
+          <ul id="r-cautions" class="r-list note"></ul>
+        </section>
+      </div>
+
+      <section class="r-block">
+        <h2 class="r-h">対戦では……</h2>
+        <p id="r-play" class="r-text"></p>
+      </section>
+
+      <section class="r-block">
+        <h2 class="r-h">デッキ構築では……</h2>
+        <p id="r-deck" class="r-text"></p>
+      </section>
+
+      <section class="r-block">
+        <h2 class="r-h">上達のアドバイス</h2>
+        <p id="r-advice" class="r-text"></p>
+      </section>
+
+      <section class="r-block">
+        <h2 class="r-h">相性のいいタイプ</h2>
+        <div class="rel-list">
+          <div class="rel">
+            <p class="rel-label">仲のいいタイプ</p>
+            <button id="r-good" class="opp" type="button"></button>
+            <p id="r-good-note" class="rel-note"></p>
+          </div>
+          <div class="rel">
+            <p class="rel-label">刺激を受けるタイプ</p>
+            <button id="r-inspire" class="opp" type="button"></button>
+            <p id="r-inspire-note" class="rel-note"></p>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <div class="r-actions">
+      <div id="invite-result" class="invite" hidden>
+        <a class="btn btn-line invite-line" target="_blank" rel="noopener">友達にもやってもらう（LINE）</a>
+        <button class="btn btn-ghost invite-copy" type="button">診断のURLをコピー</button>
+        <p class="invite-status r-small" role="status"></p>
+      </div>
+      <button id="btn-retry" class="btn btn-ghost" type="button">最初から診断し直す</button>
+      <button id="btn-types" class="btn btn-text" type="button">16タイプ一覧を見る</button>
+    </div>
+  </section>
+
+  <!-- ================= 診断中の演出 ================= -->
+  <div id="diag" class="diag" hidden role="status" aria-live="polite">
+    <div class="deck" aria-hidden="true">
+      <div class="dk back"></div><div class="dk back"></div><div class="dk back"></div><div class="dk back top"></div>
+    </div>
+    <p class="diag-title">診断中<span class="dots"></span></p>
+    <div class="diag-meter">
+      <div class="progress"><div id="diag-fill" class="progress-fill" style="width: 0%"></div></div>
+      <p class="diag-remain">診断完了まで あと<span id="diag-pct" class="mono">100</span>%</p>
+    </div>
+    <p id="diag-step" class="diag-step"></p>
+  </div>
+
+</div>
+
+<script>
+/* ---- data/config.js ---- */
+/**
+ * CARDNA サイト設定
+ * ------------------------------------------------------------
+ * 公開URLやハッシュタグなど、運用で変わる値をここにまとめます。
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  root.CARDNA.CONFIG = {
+    /** 公開URL。設定するとシェア文に自動で付きます（空なら付けない） */
+    SITE_URL: "https://cardna.vercel.app/",
+    /** シェア文に付けるハッシュタグ（# なし） */
+    HASHTAGS: ["CARDNA", "カードゲーマー診断"],
+    /** localStorage のキー。データ構造を大きく変えたら v を上げる */
+    STORAGE_KEY: "cardna.progress.v2",
+    /**
+     * 移行用：古い保存キー。2026-10 の質問改訂で質問IDが変わったため、
+     * 旧質問への回答は引き継がずに削除する（旧ブランド時代の保存キーを含む）。
+     */
+    LEGACY_STORAGE_KEYS: ["cardna.progress.v1", "cgti.progress.v1"],
+    /** 回答後、次の質問へ進むまでの待ち時間（ミリ秒） */
+    ADVANCE_DELAY_MS: 220,
+    /**
+     * 計測フック。Google Analytics などを入れるときはここで送信する。
+     * 例: function (name, params) { gtag("event", name, params); }
+     */
+    onEvent: function (name, params) {},
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- data/axes.js ---- */
+/**
+ * CARDNA 診断軸の定義
+ * ------------------------------------------------------------
+ * 各軸は left（スコアが正）と right（スコアが負）の2極を持ちます。
+ * スコアが 0 以上なら left、0 未満なら right と判定します。
+ * 軸の順番がそのまま 4文字コードの並び順になります。
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  root.CARDNA.AXES = [
+    {
+      // 1軸目：旧コードでは右側が I（Intuitive）だった。I は廃止し F（Flair）に変更。
+      // 判定ロジック・質問は変更なし（questions.js の id "ai01"〜 は保存データ互換のため据え置き）
+      id: "AF",
+      title: "思考方法",
+      left: {
+        letter: "A",
+        en: "Analysis",
+        label: "分析",
+        desc: "カードの相互作用・確率・情報・役割を分析して判断する",
+      },
+      right: {
+        letter: "F",
+        en: "Flair",
+        label: "ひらめき",
+        desc: "全体の流れ・経験・感覚・ひらめきから判断する",
+      },
+    },
+    {
+      id: "LE",
+      title: "学習方法",
+      left: {
+        letter: "L",
+        en: "Logic",
+        label: "理論",
+        desc: "理論・体系・確率・他人の考えから理解する",
+      },
+      right: {
+        letter: "E",
+        en: "Experience",
+        label: "経験",
+        desc: "実戦・対戦経験・失敗・試行錯誤から理解する",
+      },
+    },
+    {
+      id: "SC",
+      title: "成長方法",
+      left: {
+        letter: "S",
+        en: "Solo",
+        label: "探究",
+        desc: "一人で研究・検証・試行錯誤して成長する",
+      },
+      right: {
+        letter: "C",
+        en: "Community",
+        label: "協調",
+        desc: "仲間との対戦・議論・情報交換を通じて成長する",
+      },
+    },
+    {
+      id: "GX",
+      title: "プレイ目的",
+      left: {
+        letter: "G",
+        en: "Goal",
+        label: "目標",
+        desc: "勝利・順位・ランク・上達など具体的な成果を重視する",
+      },
+      right: {
+        letter: "X",
+        en: "Experience",
+        label: "体験",
+        desc: "面白さ・新しい体験・デッキを使う楽しさ・仲間との時間を重視する",
+      },
+    },
+  ];
+
+  /** 回答の選択肢（上から表示順）。value は「質問文に当てはまる度合い」 */
+  root.CARDNA.CHOICES = [
+    { value: 2, label: "とても当てはまる" },
+    { value: 1, label: "やや当てはまる" },
+    { value: 0, label: "どちらともいえない" },
+    { value: -1, label: "あまり当てはまらない" },
+    { value: -2, label: "まったく当てはまらない" },
+  ];
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- data/questions.js ---- */
+/**
+ * CARDNA 質問データ（全40問・各軸10問）
+ * ------------------------------------------------------------
+ * id    : 質問ID（保存データのキー。2026-10 の質問改訂で v2 の ID に変更）
+ * axis  : 測定する軸の id（axes.js 参照）
+ * pole  : 採点方向
+ *         "left"  … 当てはまるほど左側（A / L / S / G）にスコアが入る（正）
+ *         "right" … 当てはまるほど右側（F / E / C / X）にスコアが入る（負）
+ * scene : 想定している場面（画面には出さない。切り口の偏りチェック用）
+ * text  : 質問文。5段階の「当てはまる度合い」で答えられるよう、言い切りの形で書く
+ *
+ * 書き方のルール
+ * - 1問につき1つの判断だけを聞く（ほかの軸の要素を混ぜない）
+ * - 具体的な場面を思い浮かべられる文にする
+ * - どちらの傾向も自然に選べるよう、片方を良く見せる言葉を使わない
+ * - 各軸とも 1,3,5,7,9 問目が left、2,4,6,8,10 問目が right（テストで検証）
+ *
+ * QUESTION_ORDER:
+ *   "interleave" … 4軸を順番に1問ずつ出題（A/F → L/E → S/C → G/X → A/F …）
+ *   "asListed"   … この配列の並び順のまま出題
+ *   "random"     … 診断を始めるたびにシャッフル（順番は途中保存にも記録し、再開時は同じ順で続ける）
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  root.CARDNA.QUESTION_ORDER = "random";
+
+  root.CARDNA.QUESTIONS = [
+    // ---------- A / F：思考方法（判断の材料を細かく分析するか、全体の感覚・ひらめきで掴むか） ----------
+    { id: "af01", axis: "AF", pole: "left",  scene: "知らない戦術に出会ったとき",     text: "相手が見たことのないカードを使ってきたら、効果を最後まで読んでから次の行動を決める。" },
+    { id: "af02", axis: "AF", pole: "right", scene: "対戦中の勝負どころ",             text: "盤面を見た瞬間に「ここが勝負どころだ」と感じて、理由はあとから考えることが多い。" },
+    { id: "af03", axis: "AF", pole: "left",  scene: "デッキ構築で迷ったとき",         text: "デッキの最後の1枠で迷ったら、候補ごとに「どの相手に、どんな場面で役立つか」を書き出して比べる。" },
+    { id: "af04", axis: "AF", pole: "right", scene: "対戦中に手札を見たとき",         text: "手札を眺めているうちに、それまで考えていなかった勝ち筋がふと浮かぶことがある。" },
+    { id: "af05", axis: "AF", pole: "left",  scene: "予想外の展開になったとき",       text: "予想外のカードを出されたら、まず相手の残りの手札や使えるリソースを数え直す。" },
+    { id: "af06", axis: "AF", pole: "right", scene: "計算と直感が食い違ったとき",     text: "計算上は有利な選択でも、なんとなく嫌な予感がするときは別の手を選ぶ。" },
+    { id: "af07", axis: "AF", pole: "left",  scene: "負けた試合を振り返るとき",       text: "負けた試合を振り返るときは、どのターンのどの選択が分かれ目だったかを特定しようとする。" },
+    { id: "af08", axis: "AF", pole: "right", scene: "新しいカードを見たとき",         text: "新しいカードを見ると、細かい効果を読み込む前に「これは使えそう」という印象が先に決まる。" },
+    { id: "af09", axis: "AF", pole: "left",  scene: "得意な戦術が通用しなかったとき", text: "得意な戦い方が通用しなかったら、相手のどのカードと噛み合わなかったのかを具体的に洗い出す。" },
+    { id: "af10", axis: "AF", pole: "right", scene: "苦手なデッキと対戦するとき",     text: "苦手なデッキと当たったときは、細かい計算より試合の流れを見て、仕掛けるタイミングを決める。" },
+
+    // ---------- L / E：学習方法（理論・体系から理解するか、実戦の経験から身につけるか） ----------
+    { id: "le01", axis: "LE", pole: "left",  scene: "知らない戦術に出会ったとき",     text: "知らない戦術に出会ったら、まず解説や上手い人の考え方を調べて、仕組みを理解しようとする。" },
+    { id: "le02", axis: "LE", pole: "right", scene: "新しいデッキで連敗したとき",     text: "新しいデッキで連敗しても、原因を考え込むより、まず何戦か続けて回してみる。" },
+    { id: "le03", axis: "LE", pole: "left",  scene: "上手い人のプレイを見たとき",     text: "上手い人のプレイを見ると、「なぜその順番なのか」が分かるまで考えたくなる。" },
+    { id: "le04", axis: "LE", pole: "right", scene: "大会前に練習するとき",           text: "大会前の練習では、一つずつ考えて回すより、とにかく試合数をこなすことを優先する。" },
+    { id: "le05", axis: "LE", pole: "left",  scene: "プレイの判断基準",               text: "「この場面ではこう動く」という自分なりの法則を、言葉やメモで整理している。" },
+    { id: "le06", axis: "LE", pole: "right", scene: "カードの評価を決めるとき",       text: "カードの評価は、理屈や前評判より、実際に何十戦か使ってみた手応えで決まる。" },
+    { id: "le07", axis: "LE", pole: "left",  scene: "新しいデッキを組んだとき",       text: "新しいデッキを組んだら、回す前に「どうやって勝つデッキか」の筋書きを頭の中で組み立てる。" },
+    { id: "le08", axis: "LE", pole: "right", scene: "上達を振り返ったとき",           text: "自分がうまくなったきっかけを思い出すと、記事や動画より、悔しかった負け試合が浮かぶ。" },
+    { id: "le09", axis: "LE", pole: "left",  scene: "苦手なデッキへの対策",           text: "苦手なデッキへの対策は、相手のデッキがどういう仕組みで勝つのかを理解するところから始める。" },
+    { id: "le10", axis: "LE", pole: "right", scene: "対戦中に迷ったとき",             text: "対戦中に迷ったら、過去に似た場面でどうなったかという記憶を頼りに決めることが多い。" },
+
+    // ---------- S / C：成長方法（一人で研究・試行錯誤するか、仲間との交流から伸びるか） ----------
+    { id: "sc01", axis: "SC", pole: "left",  scene: "新しいカードを見つけたとき",     text: "気になるカードを見つけたら、人に話す前に、まず自分一人で使い道を考えたい。" },
+    { id: "sc02", axis: "SC", pole: "right", scene: "仲間とデッキを調整するとき",     text: "デッキの調整に迷ったら、早めに誰かにリストを見せて意見をもらう。" },
+    { id: "sc03", axis: "SC", pole: "left",  scene: "大会前に練習するとき",           text: "大会前の準備は、誰かと対戦するより、一人回しや一人での調整に使う時間のほうが長い。" },
+    { id: "sc04", axis: "SC", pole: "right", scene: "負けた試合を振り返るとき",       text: "負けた試合は、一人で考えるより、誰かに話しながら振り返るほうが整理しやすい。" },
+    { id: "sc05", axis: "SC", pole: "left",  scene: "使うデッキを決めるとき",         text: "人から教わった構築より、自分で試行錯誤してたどり着いた構築を使いたい。" },
+    { id: "sc06", axis: "SC", pole: "right", scene: "考えが行き詰まったとき",         text: "一人で考えて行き詰まったら、すぐ誰かに相談して突破口を探す。" },
+    { id: "sc07", axis: "SC", pole: "left",  scene: "得意な戦術が通用しなかったとき", text: "得意な戦い方が通用しなくなったら、人に聞く前に、まず自分の力で解決策を探したい。" },
+    { id: "sc08", axis: "SC", pole: "right", scene: "仲間が結果を出したとき",         text: "一緒に調整した仲間が勝つと、自分が勝ったときと同じくらいの手応えがある。" },
+    { id: "sc09", axis: "SC", pole: "left",  scene: "ふだんの過ごし方",               text: "カードゲームについて考えている時間の大半は、一人でいるときだ。" },
+    { id: "sc10", axis: "SC", pole: "right", scene: "上達したいと思ったとき",         text: "もっとうまくなりたいと思ったら、まず一緒に練習できる相手を探す。" },
+
+    // ---------- G / X：プレイ目的（勝利・成果を追うか、面白さ・体験を味わうか） ----------
+    { id: "gx01", axis: "GX", pole: "left",  scene: "大会で使うデッキを決めるとき",   text: "大会で使うデッキは、使っていて楽しいかどうかより、勝ちやすさで選ぶ。" },
+    { id: "gx02", axis: "GX", pole: "right", scene: "勝利と面白さで迷ったとき",       text: "勝てる見込みが低くても、面白いコンボが決まりそうなら、それを狙いにいく。" },
+    { id: "gx03", axis: "GX", pole: "left",  scene: "対戦が終わったとき",             text: "対戦が終わったら、試合の内容より先に、勝敗や戦績のことが気になる。" },
+    { id: "gx04", axis: "GX", pole: "right", scene: "苦手なデッキと対戦するとき",     text: "苦手なデッキと当たっても、どんな試合になるのか楽しみな気持ちのほうが大きい。" },
+    { id: "gx05", axis: "GX", pole: "left",  scene: "得意な戦術が通用しなかったとき", text: "好きな戦い方が勝てなくなったら、別の戦い方に切り替えて勝ちを取りにいく。" },
+    { id: "gx06", axis: "GX", pole: "right", scene: "新しいカードを見たとき",         text: "新しいカードを見ると、強いかどうかより「どんな遊び方ができるか」が気になる。" },
+    { id: "gx07", axis: "GX", pole: "left",  scene: "練習の目標を決めるとき",         text: "練習するときは、「次の大会でここまで勝つ」のような具体的な目標を決めている。" },
+    { id: "gx08", axis: "GX", pole: "right", scene: "連敗しているとき",               text: "連敗していても、使っているデッキが楽しければ、あまり気にならない。" },
+    { id: "gx09", axis: "GX", pole: "left",  scene: "勝てない相手がいるとき",         text: "なかなか勝てない相手がいると、勝てるようになるまで対策を練りたくなる。" },
+    { id: "gx10", axis: "GX", pole: "right", scene: "結果が振るわなかった大会",       text: "結果が振るわなかった大会でも、印象に残る一戦があれば満足して帰れる。" },
+  ];
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- data/types.js ---- */
+/**
+ * CARDNA 16タイプ定義
+ * ------------------------------------------------------------
+ * キー  : 4文字コード（AXES の並び順：思考 A/F ・ 学習 L/E ・ 成長 S/C ・ 目的 G/X）
+ * name  : タイプ名
+ * catch : キャッチコピー
+ * desc  : 「あなたの特徴」。段落は空行（\n\n）で区切る
+ * aruaru: 「このタイプのあるある」2つ
+ * strengths / cautions : 「あなたの強み」3つ / 「注意点」2つ
+ * play  : 「対戦では……」
+ * deck  : 「デッキ構築では……」
+ * advice: 「上達のアドバイス」
+ * goodWith   : 仲のいいタイプ   { code, note }
+ *              ＝ 学習・成長・目的が同じで、思考方法（A/F）だけが違うタイプ（相互）
+ * inspiredBy : 刺激を受けるタイプ { code, note }
+ *              ＝ 思考方法と目的が同じで、学習（L/E）と成長（S/C）が違うタイプ（相互）
+ *   ※ この組み合わせルールは tests/logic.test.js で検証しています。
+ *
+ * FAMILIES : 4文字コードの先頭2文字（思考×学習）ごとの「属性」。結果カードの色分けに使う。
+ *
+ * ※ どのタイプにも優劣はありません。文章を編集するときもこの方針を守ってください。
+ * ※ 2026-10 に各項目の文章を約3倍に拡充（改修前の文章は tests/fixtures/types.before.js）。
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  root.CARDNA.FAMILIES = {
+    AL: { label: "理詰め", color: "#2A5BD7", ink: "#FFFFFF" },
+    AE: { label: "実戦読み", color: "#E2483D", ink: "#FFFFFF" },
+    FL: { label: "発想理論", color: "#7B4BD1", ink: "#FFFFFF" },
+    FE: { label: "感覚実戦", color: "#1E9E6A", ink: "#FFFFFF" },
+  };
+
+  root.CARDNA.TYPES = {
+    // ===================================================== 理詰め（A × L）
+    ALSG: {
+      name: "策士",
+      catch: "勝つための最適解を追い続ける",
+      desc: "カードの相互作用も確率も、すべてを勝ちにつなげる材料として組み立てるタイプ。環境を読み、採用する1枚1枚に理由を持たせ、一人で検証を重ねて「今いちばん勝てる形」を突き詰めます。対戦では相手の次のターンまで見通し、勝ち筋から逆算した一手を選ぶのが得意。勝った理由まで説明できるのが策士の流儀です。\n\n選択肢が複数あるとき、策士はまず「この試合はどうやって終わるか」を決めます。勝ち方が見えたら、そこから逆算して今のターンにやるべきことを絞り込み、残った候補を「相手に返されたときの損失」の大きさで比べる。デッキに入れる1枚を選ぶときも同じで、カード単体の強さより「どの負け筋を消してくれるか」で評価します。迷う時間は長くても、一度決めたらぶれません。盤面が複雑になるほど、むしろ集中力が増していくタイプです。\n\n策士の頭の中では、対戦はいつも枝分かれした道のように広がっています。相手が除去を持っているならこの道、持っていないならあの道。手札の枚数や公開情報から相手の選択肢を絞り込み、いちばん多くのパターンで勝てる線を選びます。新弾が出れば対面ごとの相性を自分なりに整理し、仮説を一人で回して確かめる。その地道な準備が、大会当日の迷いのなさにつながっています。\n\n策士の強みがいちばん表れるのは、互いに手札を残したまま終盤を迎えた、読み合いの濃い試合です。公開情報から相手の残りの選択肢を絞り込み、どの返しにも耐えられる順番でカードを出していく。その詰め方の正確さが、接戦をものにする決め手になります。\n\n周りからは「いつも冷静」「準備が完璧な人」と見られがちです。対戦相手からすると、こちらの狙いをことごとく先回りしてくる手ごわい存在。本人がいちばん充実を感じるのは、何日もかけて立てた仮説が大会でぴたりとはまり、想定どおりの展開で勝ち切れた瞬間です。逆に、偶然の引きで拾った勝利は、勝ちは勝ちでもどこか物足りなさが残ります。\n\n勝ったときは「計画どおり」の手応えを、負けたときは「どこで計算がずれたか」の答えを探しにいきます。結果そのものより、結果に至る筋道が見えているかどうかを大事にしているのが策士らしさです。\n\n自分では気づきにくいのは、「正しい手」を探すあまり、相手のクセや場の空気といった数字にならない情報を軽く見てしまうことです。また、負けた原因を分析しすぎて、運が悪かっただけの試合まで自分のミスとして背負い込むこともあります。分析の対象を「次に活かせる部分」に絞れるようになると、策士の強さはもっと楽に、もっと長く発揮できるようになります。",
+      aruaru: [
+        "大会前夜、デッキリストの最後の1枠で2時間悩む。候補の2枚を対面ごとに比べたメモまで作ったのに、当日の朝にもう一度入れ替えている",
+        "負けた試合の分岐点を、帰り道に頭の中で再生している。「あの2択、確率ならこっちだった」と、家に着く頃には自分なりの結論が出ている",
+      ],
+      strengths: [
+        "勝ち筋から逆算したプレイ選択。数ターン先のゴールを先に決めるので、手順の無駄やリソースの浪費が少ない",
+        "採用カードの理由を言葉にできる。1枚ごとの役割がはっきりしているので、調整で何を抜くかに迷いにくい",
+        "環境の変化を読んで構築を最適化できる。流行と対策を整理し、次に増えそうなデッキまで見越して準備できる",
+      ],
+      cautions: [
+        "最適解にこだわるあまり、想定外の展開で判断が止まることがある。準備していない状況では「正解がない」ことに戸惑い、持ち時間を使いすぎてしまう場面も。完璧な答えより、十分によい答えを早く出す練習が助けになる",
+        "一人で結論を出しがちなので、他人の視点を入れると見落としが減る。分析に自信がある分、前提そのものがずれていたときに自分では気づきにくい",
+      ],
+      play: "序盤から終盤までの計画を立て、リスクを計算しながら勝率の高い選択を積み重ねる。相手の行動パターンを読んで先回りするのが得意。相手が動かなかったターンには「何を構えているのか」を考え、引っかかりにくい順番でカードを出す。有利な盤面では無理をせず、逆転の手段を一つずつ潰していく堅実な勝ち方を好む。終盤は勝ちまでの手数を数え、確実に届く順番を決めてから動き出す。",
+      deck: "環境上位を研究したうえで、メタ読みを反映した1〜2枚の調整で差をつける。役割の重複や事故率までチェックして完成度を上げる。初手に欲しいカードを引ける確率を計算し、苦手な対面を想定して対策カードの枚数を決める。好きなカードでも、勝率に貢献しないと判断すれば外せる割り切りの良さがある。入れ替え候補のカードにも、それぞれ入れる場面を決めてある。",
+      advice: "計画が崩れた場面の練習をあえて増やしてみよう。「想定外のときの決め打ち方」まで準備できると、最適解の精度がさらに上がる。練習では手札事故や予想外のカードが出た状況をわざと作り、制限時間を決めて判断してみるのがおすすめ。一人で出した結論を一度だけ人に話してみると、当たり前だと思っていた前提の穴も見つかりやすい。",
+      goodWith: { code: "FLSG", note: "同じく一人で勝ち筋を研究する仲。あなたが詰めた理屈に、思いもよらない発想を足してくれる。「この環境の答えはこれ」と結論づけたデッキに、天才タイプは「でもこのカードを入れたら？」と別の角度から揺さぶりをかけてくる。お互い一人の時間を大事にするので、距離感もちょうどいい。" },
+      inspiredBy: { code: "AECG", note: "同じく分析で勝ちを狙うのに、仲間との実戦から学ぶ相手。机上の結論を試す場をくれる。あなたが一人で計算している間に、実戦家は仲間と何十戦も回して「実際どうだったか」を積み上げている。理論と実戦の答え合わせをすると、どちらにとっても大きな発見になる。" },
+    },
+
+    ALSX: {
+      name: "研究者",
+      catch: "誰も知らない答えを探し続ける",
+      desc: "新しいカードが出るたびに、まだ誰も気づいていない組み合わせを探しに行くタイプ。勝つこと以上に「なぜそうなるのか」を解き明かす過程が楽しく、一人で検証を重ねて理屈の通った答えにたどり着いたときに一番の喜びを感じます。周りが見向きもしないカードの使い道を見つけ出すのは、研究者の得意分野です。\n\n研究者の思考は、いつも「もし〜だったら？」という問いから動き出します。新しいカードを見ると、まず効果の文章を一語ずつ確かめ、既存のどのカードと処理がぶつかるかを洗い出す。対戦中に迷ったときも、勝ちやすさより「どちらの選択がより多くを教えてくれるか」で決めることがあります。カードを選ぶ基準は、強さよりも仕組みの面白さと、まだ誰にも解き明かされていない余白の大きさです。\n\n研究者はカードの文章を、ほかの人より一段深く読みます。「このタイミングで効果を使ったらどうなる？」「この2枚は同時に処理されるのでは？」と、ルールの細部や処理の順番まで確かめずにはいられません。一人回しで同じ動きを何十回も試し、成功する確率や必要な条件をノートに書き留めていく。その積み重ねから、誰も知らなかった動きが生まれます。\n\n研究者の強みが光るのは、複雑な効果が何重にも絡み合い、対戦相手も処理の順番に迷うような盤面です。誰よりもカードの文章を読み込んでいるからこそ、ほかの人が見落とす抜け道や、ルール上だけ成立する一手を落ち着いて見つけ出せます。\n\n周りからは「カードのことなら何でも知っている人」と思われていて、ルールの細かい処理で迷ったときに真っ先に頼られます。ただ本人は、物知りだと思われたいわけではありません。いちばん満たされるのは、誰も試していなかった組み合わせが理屈どおりに動いた瞬間。その場に観客がいなくても、一人で小さくガッツポーズをしているような、静かな喜び方をするのが研究者です。\n\n勝ったときに嬉しいのは「仮説が正しかった」と証明できたこと。負けても「この条件では成立しない」という新しいデータが手に入るので、落ち込むより先に次の検証を考え始めているのが研究者らしさです。\n\n気づきにくいのは、検証を重ねるうちに「完成してから見せたい」という気持ちが強くなり、発表のタイミングをどんどん逃してしまうことです。また、仕組みへの興味が勝って、対戦相手が待ちくたびれていないかに目が向かない瞬間もあります。研究の途中経過を気軽に人と共有できるようになると、発見のスピードも、カードゲームの楽しさの幅も一気に広がっていきます。",
+      aruaru: [
+        "カードリストを読んでいるだけで1時間たっている。気になる1枚の効果を読み返しているうちに、関係しそうなカードを次々と調べ始めて止まらない",
+        "「このカード、実は強くない？」から話が始まる。周りがピンときていなくても、自分の中ではすでに3通りの使い道と、成立する条件まで整理できている",
+      ],
+      strengths: [
+        "カードの隠れた使い道を見つける発見力。ほかの人が読み飛ばす一文から、まったく別の役割を見つけ出せる",
+        "仕組みを深く理解する探究心。ルールや処理の順番まで押さえているので、複雑な盤面でも混乱しにくい",
+        "流行に左右されない独自の視点。人気や評判ではなく、自分の検証結果をもとにカードの価値を判断できる",
+      ],
+      cautions: [
+        "検証に夢中になり、実戦で試す機会が後回しになりやすい。一人回しでは完璧だった動きも、相手の妨害が入ると成立しないことがあるので、早めに対戦で確かめたい",
+        "面白い結論ほど、人に伝えないまま終わりがち。せっかくの発見も、自分のノートの中だけで眠らせておくのはもったいない",
+      ],
+      play: "一手一手に仮説を持ち、試合そのものを実験として楽しむ。想定どおりの動きが決まったときの満足感が大きい。相手のカードが公開されると、効果をじっくり読んで自分のカードとの相互作用を確かめるので、初見のデッキにも冷静に向き合える。勝つための最短ルートより、検証したい動きを優先して選ぶこともある。",
+      deck: "テーマや特定のカードを軸に、相互作用を突き詰めたオリジナル構築を組む。完成までに何度も組み直す。1枚の可能性を証明するために、そのカードが最大限に輝く環境を周りのカードで整えていくのが研究者流。採用理由を説明させたら止まらないが、それは理屈が隅々まで通っている証拠でもある。",
+      advice: "研究の成果を短いメモや投稿にまとめてみよう。人に説明しようとすると、自分の理論の穴も見つかりやすい。あわせて、検証が7割くらいまで進んだ段階で一度実戦に持ち込んでみるのもおすすめ。対戦相手の妨害や時間の制約という「本番の条件」が加わることで、研究の精度がもう一段上がる。",
+      goodWith: { code: "FLSX", note: "一人で新しい組み合わせを探す同志。あなたの検証にひらめきの種をくれる。発明家タイプが「こんな動きできそう！」と持ってきたアイデアを、あなたが仕組みから確かめて成立させる。発見と検証の役割が自然に分かれる、相性のいい研究仲間。" },
+      inspiredBy: { code: "AECX", note: "理屈を大事にしながら、人と遊ぶ中で発見する相手。研究を実際の対戦の場に連れ出してくれる。あなたがノートの中で温めていた動きも、仲間タイプと遊ぶうちに「対戦で決まると楽しい」という新しい価値が見えてくる。研究を人と分かち合う喜びを教えてくれる存在。" },
+    },
+
+    ALCG: {
+      name: "司令塔",
+      catch: "仲間を率いて勝利を目指す",
+      desc: "分析と理論を武器に、仲間内の勝利を設計するタイプ。環境の整理、対策の分担、練習の組み立てまで、みんなで勝つための段取りを考えるのが得意です。議論の場では情報をまとめて結論へ導く役回りになりやすく、仲間が結果を出したときも自分のことのように喜べます。全体を見渡す視点が持ち味です。\n\n司令塔の頭の中では、自分の一戦とチーム全体の動きが常に並行して流れています。対戦中の選択では「この試合に勝てるか」と同時に「チームで決めた作戦と矛盾しないか」を確かめ、共有した方針から外れる手はよほどの理由がない限り選びません。デッキの1枚を決めるときも、自分の好みより「仲間が苦手な相手を誰がカバーするか」という配置を優先して考えるのが司令塔らしいところです。\n\n大会が近づくと、司令塔の頭の中にはチーム全体の作戦図が描かれ始めます。「今回は誰がどのデッキを使うか」「この対面の練習相手は誰が担当するか」。グループのチャットに環境のまとめを流したり、対面ごとの有利不利を表に整理したりと、仲間が迷わず練習に集中できる状態を作ります。一人ひとりの得意不得意を把握しているので、配置も的確です。\n\n司令塔の強みが際立つのは、大会前の限られた時間で、チームとして準備を間に合わせなければならない場面です。誰が何を練習するか、どの情報を最優先で共有するかを素早く決め、バラバラだった仲間の動きを一本の作戦にまとめ上げていきます。\n\n周りからは「頼れるまとめ役」「この人がいれば準備は大丈夫」と見られています。初めて会った人にも、段取りの良さと話の分かりやすさですぐに覚えてもらえるタイプです。充実を感じるのは、チームで練った対策が本番で何度も噛み合い、仲間が次々と勝ち上がっていくのを見ている時間。自分の試合以上に、仲間の対戦結果の報告で一喜一憂していることもあります。\n\n勝ったときは、作戦がチームに浸透して機能したことに手応えを感じます。負けたときは誰かを責めるのではなく、準備の段階で何が足りなかったかを洗い出して、次の作戦に反映させるのが司令塔のやり方です。\n\n自分で気づきにくいのは、全体を見渡す役割に慣れすぎて、自分の気持ちや疲れを後回しにしてしまうことです。仲間のために用意した情報が多すぎて、かえって相手を迷わせている場面もあります。「伝えるのは大事な3つまで」と絞ってみたり、たまには作戦会議に一参加者として加わってみたりすると、司令塔の視野の広さがもっと素直に活きてきます。",
+      aruaru: [
+        "大会前のグループ通話で、なぜか議事進行をしている。話が脱線し始めると「で、結局どのデッキで出る？」と本題に戻すのはだいたいこの人。決まった内容をまとめて送るところまでがいつもの流れ",
+        "仲間の対戦を後ろから見て、終わったあとに一言アドバイスしている。「3ターン目のあれ、こっちの順番なら相手の除去を避けられたよ」と具体的",
+      ],
+      strengths: [
+        "情報を整理して方針を決める力。バラバラな意見や情報を表にまとめ、チームが動ける結論に落とし込める",
+        "仲間の考えを引き出し、まとめる力。話すのが苦手な仲間にも意見を聞き、全員の知恵を作戦に反映できる",
+        "チーム全体の勝率を上げる視点。自分一人の勝ち負けより、仲間全員の成績が上がる準備を優先できる",
+      ],
+      cautions: [
+        "全体を優先して、自分の好みを後回しにしがち。チームに必要な役割を引き受け続けるうちに、自分が本当に使いたいデッキを触る時間がなくなっていることも",
+        "仲間に求める水準が上がりすぎないよう気をつけたい。自分の基準で作った作戦は、全員にとって同じように実行しやすいとは限らない",
+      ],
+      play: "盤面を俯瞰して優先順位を整理し、ミスの少ない堅実な選択を続ける。対戦後の振り返りまでがワンセット。試合中も「この盤面で最も大事なのは何か」を常に考え、細かな損得よりも勝敗に直結する要素を優先する。チーム戦では自分の試合だけでなく、仲間の進行状況まで気にかけて判断を変えることもある。",
+      deck: "仲間と情報を持ち寄って環境を分析し、役割の明確な完成度の高いリストを組む。対策カードの選定にこだわる。自分のデッキだけでなく、仲間のデッキとの組み合わせまで考え、チーム全体で苦手な対面がなくなるように調整する。採用理由を仲間に説明できる形で残しておくのも司令塔らしいところ。",
+      advice: "チームのための準備と同じくらい、自分のプレイ練習の時間も確保しよう。司令塔自身の一勝が、チームにいちばん効く。作戦を立てるときは、仲間それぞれが「実行しやすいかどうか」まで確認してみて。全員が自信を持って動ける作戦は、理論上の最適解よりも本番で強いことが多い。たまには自分が作戦を聞く側に回ってみるのも、いい刺激になる。",
+      goodWith: { code: "FLCG", note: "仲間と勝ちを目指す同士。あなたの段取りに、チームを動かす勢いを足してくれる。リーダータイプが「この方向でいこう」と旗を振り、あなたがそれを具体的な練習計画と役割分担に落とし込む。勢いと段取りがそろったチームは、本番でぶれにくい。" },
+      inspiredBy: { code: "AESG", note: "同じく分析で勝ちにいくのに、一人で実戦を重ねる相手。チームにない勝負勘を見せてくれる。勝負師タイプは、議論より先に何十戦も回して答えを掴んでくる。チームで時間をかけて出した結論を、勝負師の体感とすり合わせると、作戦の確かさがぐっと増す。" },
+    },
+
+    ALCX: {
+      name: "参謀",
+      catch: "仲間と考え、勝負を支える",
+      desc: "理屈で考えることも、仲間と話すことも好きなタイプ。勝ち負けだけにこだわらず、みんなで「ああでもない、こうでもない」と考える時間そのものを楽しみます。誰かのデッキ相談に乗ったり、プレイの根拠を一緒に整理したりするのが得意で、気づけば周りから頼られる存在に。知識を共有して場を盛り上げる参謀役です。\n\n参謀の思考は、自分の頭の中だけで完結しません。対戦中に迷う場面でも「あの人ならどう考えるだろう」と、知っている誰かの視点を借りて選択肢を広げてから、理屈で一つに絞り込みます。カードを選ぶときは、勝率への貢献に加えて「この1枚があると会話が生まれるか」「相手も楽しめる試合になるか」を自然と考えに入れている。そこが、同じ理屈派の中でも参謀ならではの特徴です。\n\n参謀は、相手の「やりたいこと」を理屈で支えるのが上手です。友達が「このカードで勝ちたい」と言えば、勝率の高い構築を押しつけるのではなく、そのカードが活きる組み合わせを一緒に考えます。対戦後の感想戦では、勝った側も負けた側も納得できるように「あの場面ではこういう選択肢もあった」と整理してくれるので、話していると自然に考えが深まっていきます。\n\n参謀の強みが表れるのは、対戦後の感想戦や、仲間内のデッキ相談の席です。結果だけを見て落ち込んでいる人に「あの場面には別の選択肢もあったね」と筋道を示し、次に何を試せばいいかを一緒に見つけられる。その一言で場の空気が前向きに変わります。\n\n周りからは「話していると考えが整理される人」と思われています。相談を持ちかけると、答えを押しつけるのではなく、相手が自分で気づけるような問いを返してくれる。そんなところが信頼される理由です。いちばん楽しいのは、みんなでああだこうだと議論した結果、誰も最初は思いつかなかった結論にたどり着いた瞬間。その場にいた全員の顔が明るくなるのを見るのが好きです。\n\n勝ったときは、仲間と考えた作戦がうまく決まったことが何より嬉しい。負けたときも、その試合を材料にまたみんなで話せることを楽しめる。カードゲームを「考えて、語り合う遊び」として味わい尽くしているのが参謀らしさです。\n\n気づきにくいのは、人の考えを引き出すのが得意な分、自分自身の意見を最後まで口にしないまま話が終わってしまうことです。相手の好みを尊重するあまり、本当は伝えたほうがいい改善点を飲み込んでしまうこともあります。ときには「自分ならこうする」とはっきり言ってみると、議論がさらに深まり、仲間からの信頼もいっそう厚くなっていきます。",
+      aruaru: [
+        "友達のデッキ相談に、自分のデッキより熱が入る。「その構築なら、この1枚を入れると動きが安定するかも」と、気づけば深夜まで一緒にリストを眺めている",
+        "対戦後の感想戦が、対戦本番より長い。勝った側と負けた側で「あの場面、実はこっちが正解だった？」と盛り上がり、ショップの閉店時間が近づいている",
+      ],
+      strengths: [
+        "相手に合わせて分かりやすく説明できる。初心者にはやさしく、詳しい人には細かく、伝え方を自然に切り替えられる",
+        "議論の中から新しいアイデアを引き出せる。人の何気ない一言を拾って、具体的な構築案やプレイ案に育てられる",
+        "仲間の個性を活かす提案ができる。正解を押しつけず、その人の好きなカードや遊び方に合った改善案を出せる",
+      ],
+      cautions: [
+        "人のサポートに回りすぎて、自分の調整時間が減りがち。相談に乗るのは楽しいけれど、自分のデッキが大会前日まで未完成ということになりやすい",
+        "議論が楽しくて、結論がなかなか出ないことも。いろいろな可能性を検討できるのは強みだが、決めるべき場面では「今日はこれでいく」と区切りをつけたい",
+      ],
+      play: "理屈を大事にしつつ、相手とのやりとりも楽しむ。感想戦で互いの考えを交換する時間が好き。試合中は相手の狙いを読みながら、「相手ならここで何を考えるか」を推理して対応する。相手の意外なプレイに出会うと、勝敗とは別に「そういう考え方もあるのか」と感心してしまうことも多い。",
+      deck: "仲間との会話から生まれたアイデアを形にする。勝率だけでなく「語りたくなるデッキ」を好む。カードの採用理由に一つずつ筋道があり、それを人に話すのがまた楽しい。完成したデッキを仲間に回してもらい、その感想をもとに調整を重ねていくので、自分一人では思いつかない形に仕上がることも多い。",
+      advice: "議論で出たアイデアは、次の対戦会で1つだけでも試してみよう。話した内容が実戦で確かめられると、相談の質がもう一段上がる。また、週に一度でも「自分のデッキだけを触る時間」を決めておくのがおすすめ。人に伝える知識が豊富な分、自分のプレイに還元できれば、もっと楽しく強くなれる。相談に乗った経験を振り返ると、自分のデッキの弱点にも気づけるはず。",
+      goodWith: { code: "FLCX", note: "仲間と考える時間を楽しむ同士。あなたの理屈に、伝わる言葉と面白い切り口をくれる。案内人タイプは、ゲームの面白さを感覚的に人へ届けるのが得意。あなたの筋道立った説明と組み合わせると、初心者にも上級者にも響く「最高の解説コンビ」になれる。" },
+      inspiredBy: { code: "AESX", note: "同じく分析好きで楽しさ重視なのに、一人で黙々と磨く相手。一つを極める深さを教えてくれる。あなたが仲間と幅広く語り合う間に、職人タイプは一つのデッキを何年もかけて磨き込んでいる。その深さに触れると、議論だけでは届かない理解があることに気づける。" },
+    },
+
+    // ===================================================== 実戦読み（A × E）
+    AESG: {
+      name: "勝負師",
+      catch: "実戦を重ねて勝ち筋を掴む",
+      desc: "分析する頭を持ちながら、答えは実戦の中で確かめるタイプ。とにかく数をこなし、その中で見えてきた勝ち筋を一人で磨き上げていきます。理屈よりも「この場面ではこう動くと勝てる」という手応えを信じ、本番の勝負どころで迷わず踏み込めるのが強み。対戦を重ねるほど精度が上がっていく、実戦派の分析家です。\n\n勝負師が選択肢を前にしたとき、頭の中で起きているのは計算よりも照合です。目の前の盤面を、これまでに見てきた無数の試合と重ね合わせ、「この形は前にも見た。あのときはこう動いて勝った」という記憶を素早く引き出す。デッキのカードを選ぶ基準も、紙の上の強さではなく「実際の試合で何回仕事をしたか」。数字にしにくい手応えを、自分の中では確かなデータとして扱っています。\n\n勝負師の判断の土台は、自分が実際に見てきた何百という盤面です。「この対面は先に動いた方が勝つ」「このカードが見えたら相手は次にあれを狙っている」。そうした実感を一人で積み上げ、試合中に瞬時に引き出します。ランク戦や大会では淡々と試合をこなしながら、頭の中では勝敗の傾向を数え、次の一戦に修正をかけています。\n\n勝負師の強みが光るのは、序盤の数ターンで試合の流れが決まるような、テンポの速い対戦です。考え込む前に体が覚えている最善の形を出し、相手が一瞬でも隙を見せたらそこを逃さない。積み重ねた試合数が、そのまま判断の速さと確かさになっています。\n\n周りからは「黙々と強い人」「気づいたら勝ち上がっている人」と見られがちです。口数は多くなくても、対戦の多さと安定した結果が、自然と一目置かれる理由になっています。勝負師が最も充実を感じるのは、何十戦も積み重ねて掴んだ勝ち筋が、大事な一戦でそのまま通用した瞬間。積み上げてきた時間がまとめて報われたような、静かで深い満足感があります。\n\n勝ったときは自分の読みが当たった手応えを静かに噛みしめ、負けたときは「もう10戦やれば分かる」とすぐに次の試合へ向かいます。落ち込む時間より、答えを確かめに行く時間の方が長いのが勝負師の特徴です。\n\n気づきにくいのは、数をこなすこと自体が目的になって、同じ負け方を繰り返していても試合数で上書きしようとしてしまうことです。また、自分の体感に自信があるほど、相手の新しい工夫を「たまたま」と片づけてしまう場面もあります。ときどき手を止めて、勝ち筋だけでなく負け筋のパターンにも目を向けると、積み上げた経験がさらに強い武器に変わります。",
+      aruaru: [
+        "1日に何十戦も回して「だいたい分かった」と言う。説明を求められると少し困るが、その「だいたい」が驚くほど当たっていて、周りを不思議がらせる",
+        "勝率のメモを取っているが、決め手はほぼ体感。数字を見返すより先に「今日は先攻の方が明らかに強い」と結論を出し、だいたいそのとおりになる",
+      ],
+      strengths: [
+        "実戦の手応えに基づいた判断。何百戦分の経験に裏打ちされた選択ができる",
+        "勝負どころでの決断力。攻めるべき瞬間を逃さず、迷いなくリスクを取れる",
+        "数をこなす継続力。結果が出ない時期でも試合を重ね、着実に伸びていける",
+      ],
+      cautions: [
+        "経験則が通じない新環境では、立ち上がりに時間がかかることも。過去の手応えが通用しない時期は、試合数で取り返そうとして疲れてしまいやすい",
+        "一人で回す時間が長いと、他の視点が入りにくい。自分では気づけない癖がプレイに染みついていても、指摘してくれる人がいないとそのままになりがち",
+      ],
+      play: "対戦経験から相手の動きを読み、勝負どころで大胆な選択をする。試合のテンポを握るのが得意。序盤は経験に基づいた型どおりの動きで手堅く進め、相手が隙を見せた瞬間に一気に攻める。相手の迷いや時間の使い方からも手札を推測するなど、盤面の外の情報まで判断材料にしている。",
+      deck: "使い込んで手に馴染んだデッキを、実戦の結果を見ながら少しずつ調整する。一つのデッキを長く使い込む傾向。調整の根拠は「この10戦で何回このカードに助けられたか」という実感。流行のデッキに乗り換えるより、自分が知り尽くしたデッキの精度を上げる方が勝てると考える。",
+      advice: "体感で掴んだ勝ち筋を、ときどき言葉にして書き出してみよう。新環境でも経験を応用しやすくなる。たとえば「この対面で先攻なら、3ターン目までにこれを狙う」と短く残しておくだけでも十分。あわせて、たまには誰かとプレイを見せ合ってみると、一人では見えなかった癖に気づけるはず。",
+      goodWith: { code: "FESG", note: "一人で数をこなして勝ちを狙う同士。あなたの読みに、嗅覚での先回りを足してくれる。ハンタータイプは、新しい強いデッキを誰よりも早く見つけてくる。あなたがそれを実戦で回し込んで勝ち筋を固めれば、環境の一歩先を行けるコンビになる。" },
+      inspiredBy: { code: "ALCG", note: "同じく分析で勝ちにいくのに、仲間と理論を固める相手。体感を整理する視点をくれる。司令塔タイプは、あなたが感覚で掴んでいる勝ち筋を、表やチームの言葉に整理してくれる。自分の経験が言葉になったとき、それが仲間の役にも立つことに気づける。" },
+    },
+
+    AESX: {
+      name: "職人",
+      catch: "自分の技をひたすら磨く",
+      desc: "お気に入りのデッキやプレイを、とことん磨き込むタイプ。勝敗も気にはなりますが、それ以上に「思い描いた動きを完璧に決めること」に喜びを感じます。一人で黙々と回し、細かな手順や判断を少しずつ洗練させていく姿はまさに職人。同じデッキを長く使い続け、気づけばそのデッキの第一人者になっていることも。\n\n職人の判断は、「どれが一番きれいに決まるか」という感覚に支えられています。選択肢を前にすると、勝つための近道より、自分の型を崩さずに進める道を探す。分析するのは相手の動きよりも、自分の手順の中に生まれたわずかなズレのほうです。新しいカードを見ても、まず考えるのは環境での評価ではなく「愛用のデッキの、どの1枚と入れ替えられるか」という一点。その一途さが職人の判断の軸です。\n\n職人の強さは、反復から生まれる精度にあります。同じデッキで数えきれないほど試合をしてきたので、カードを出す順番やリソースの使い方は、もう手が覚えています。「この手札ならこの順番が一番きれい」という感覚があり、わずかな違いにも気づける。環境が変わっても愛用デッキを手放さず、その中でできる最善を探し続けます。\n\n職人の強みが表れるのは、手札事故や妨害でいつもの展開ができない、苦しい試合です。愛用のデッキを知り尽くしているからこそ、残されたカードで描ける最善の手順を正確に選び出し、普通なら投げてしまうような状況からでも粘り強く立て直していけます。\n\n周りからは「あのデッキといえばこの人」と、使っているデッキとセットで覚えられていることが多いタイプです。カードを扱う手つきに迷いがなく、見ている人が思わず感心するような手際の良さがあります。充実を感じるのは、何度も練習してきた手順が本番で寸分違わず決まったとき。勝敗が決まったあとも、その一連の流れを頭の中で思い返して、静かに満足していることがあります。\n\n勝ったときに嬉しいのは、自分の理想どおりの展開で決めきれたとき。負けても、自分の技が出しきれた試合なら納得できます。逆に勝っても手順に乱れがあれば、こっそり反省している。そんな自分なりの基準を持っているのが職人らしさです。\n\n自分では気づきにくいのは、こだわりの基準が高い分、自分の小さなミスをいつまでも気にしてしまうことです。また、愛用デッキへの信頼が強いあまり、相手が用意してきた新しい対策に気づくのが遅れる場面もあります。磨き続けることと、外の変化を取り入れることは両立できるもの。ときどき視野を広げてみると、職人の技は環境が変わっても輝き続けます。",
+      aruaru: [
+        "同じデッキを何年も使い続けている。新しいカードが出るたびに「このデッキに入るか」をまず考え、スリーブもなぜかずっと同じ色のまま",
+        "理想の展開が決まると、勝敗に関係なくちょっと満足している。対戦相手に「今のきれいだったね」と言われると、その日一番の笑顔になる",
+      ],
+      strengths: [
+        "一つのデッキへの深い理解。カード同士の噛み合わせを知り尽くし、どんな手札でも最善を探せる",
+        "細かい手順やプレイの精度。カードを出す順番の小さな違いで差がつく場面で、正確な選択を積み重ねられる",
+        "自分のこだわりを貫ける芯の強さ。環境や評判に左右されず、自分が信じたデッキと遊び方を続けられる",
+      ],
+      cautions: [
+        "こだわりが強い分、環境に合わせた乗り換えは苦手かも。愛用デッキが不利な時期でも使い続けるため、結果だけを見ると苦しい期間が出てくることも",
+        "磨いた技を人に見せる機会が少なくなりがち。一人で完成させた手順や知識は、共有しなければあなたの中だけで終わってしまう",
+      ],
+      play: "使い慣れたデッキで、手順の最適化と精度を追求する。相手に関係なく自分の型をぶれずに出せる。相手の妨害が入っても、慌てずにいくつかある「型」の中から最適なものを選び直せる。派手な一発逆転より、小さな得を積み重ねて自然に勝ちに近づく、無駄のない試合運びを好む。",
+      deck: "お気に入りのカードやテーマを軸に、使い込みながら1枚単位の微調整を重ねる。1枚変えたら何十戦も回して感触を確かめるので、調整のペースはゆっくり。そのぶん、完成したリストには一切の無駄がない。新カードは「このデッキをさらに磨けるか」という視点で厳しく選び抜く。",
+      advice: "たまには環境の上位デッキを借りて回してみよう。相手側の視点を知ると、愛用デッキの磨き方に新しい方向が見つかる。また、磨き上げた手順を誰かに見せたり解説したりする機会も作ってみて。あなたの細かなこだわりは、同じデッキを使う人にとって貴重な道しるべになる。解説のために言葉にした手順は、あなた自身の上達にも役立つ。",
+      goodWith: { code: "FESX", note: "一人で好きなことに没頭する同士。あなたの丁寧な技に、新しい遊び方の発見をくれる。開拓者タイプは誰も試していないカードを持ち込んでくる。その中から「これは磨けば光る」というものを見つけて仕上げるのは、あなたの得意分野。発見と仕上げで補い合える関係。" },
+      inspiredBy: { code: "ALCX", note: "同じく分析好きで楽しさ重視なのに、仲間と理屈を語り合う相手。技を言葉にして広げるきっかけをくれる。参謀タイプと話していると、自分が手で覚えていた手順に理由が付いていく。言葉になった技は、ほかのデッキを触るときにも応用できるようになる。一人では得られない広がりをくれる相手。" },
+    },
+
+    AECG: {
+      name: "実戦家",
+      catch: "仲間と戦い、経験から強くなる",
+      desc: "仲間と対戦を重ね、その経験を分析して強くなっていくタイプ。練習相手がいるほど伸びるのが特徴で、身内の対戦会や大会での真剣勝負を通じて、勝つための引き出しを着実に増やしていきます。負けた試合も仲間と振り返って次に活かせるのが強み。ショップ大会の常連として顔を知られていることも多い、現場主義の勝負派です。\n\n実戦家の思考は、対戦テーブルの上でいちばん速く回ります。選択に迷ったら、仲間との練習で何度も見た場面を思い出し、そのとき誰がどう動いて結果がどうなったかを手がかりに決める。理屈で分析するのも得意ですが、その材料はいつも実際の試合から集めてきたものです。カードを選ぶときも、雑誌や記事の評価より「仲間との練習で手応えがあったか」が判断の出発点になっています。\n\n実戦家にとって、上達の場所はいつも対戦テーブルの上です。仲間との練習で「このデッキ相手ならこう動く」というパターンを体に入れ、大会でそれを試し、結果を持ち帰ってまた仲間と検討する。その循環を何度も回すことで、試合中に相手の狙いを素早く察知できるようになっていきます。いろいろな人と当たるほど、引き出しも増えていきます。\n\n実戦家の強みが際立つのは、大会で初めて当たる、情報の少ない相手との試合です。序盤の数手から似た相手との対戦経験を引き出し、試合中に作戦を修正していく。いろいろな人と当たってきた引き出しの多さが、そのまま対応力の高さになっています。\n\n周りからは「いつも対戦している人」「大会で会うとほっとする顔なじみ」と見られています。気さくに声をかけ、誰とでも対戦の約束ができるので、自然と練習相手に困らない環境ができあがっていきます。充実を感じるのは、練習会で仲間と散々苦しめられた相手に、大会本番で勝てたとき。みんなで積み重ねた準備が実を結んだ喜びは、何度味わっても特別です。\n\n勝ったときは仲間に報告して一緒に喜び、負けたときは「さっきのあれ、どうすればよかった？」とすぐに聞きにいく。一人で抱え込まず、悔しさをそのまま次の練習の材料に変えられるのが実戦家らしさです。\n\n気づきにくいのは、仲間との練習に頼るあまり、一人で考えを深める時間が少なくなりがちなことです。また、身内でよく当たるデッキの印象に引っ張られて、大会全体の流行を読み違えることもあります。練習の合間に、自分の判断を一人で振り返る時間をほんの少しだけ作ると、仲間から吸収したものがしっかりと自分の力として定着していきます。",
+      aruaru: [
+        "大会のあと、そのまま仲間とフリー対戦に流れ込む。さっき負けた対面を「もう一回やらせて」と再現し、帰る頃にはその対策がしっかり体に入っている",
+        "「さっきのあれ、どうすればよかった？」が口癖。負けた直後でも素直に聞けるので、気づけば周りの上手い人たちから自然とアドバイスが集まってくる",
+      ],
+      strengths: [
+        "実戦経験に基づく対応力。多くの相手と当たってきたので、初めて見る動きにも過去の経験を応用して対処できる",
+        "仲間と切磋琢磨できる環境づくり。対戦会を開いたり誘ったりして、自分も周りも強くなれる場を作れる",
+        "負けを次に活かす振り返り力。悔しさを引きずらず、具体的な改善点に変えて次の試合に持ち込める",
+      ],
+      cautions: [
+        "練習相手がいない時期はモチベーションが下がりやすい。一人で黙々と回すのはあまり得意ではないので、仲間の予定が合わないと調整が止まってしまうことも",
+        "身内の環境に合わせすぎないよう注意したい。いつもの仲間のデッキにだけ強い構築は、大会で別の相手と当たったときに思わぬ穴になる",
+      ],
+      play: "多くの対戦経験から相手の狙いを素早く察知して対応する。試合中の修正力が高い。序盤の動きから相手のデッキの型を見抜き、過去に戦った似た相手の記憶を頼りに勝ち筋を組み立て直す。予定どおりにいかない展開でも、経験の引き出しから別の勝ち方を見つけてくる。",
+      deck: "仲間との練習で手応えのあった構築を、大会の結果を見ながら調整する。採用カードの判断基準は「実際の試合で役に立ったか」。仲間が使うデッキとの練習結果をもとに、対策カードの枚数や入れ替えのプランを決めていく。",
+      advice: "身内以外の対戦相手とも積極的に当たってみよう。普段と違うデッキや考え方に触れるほど、引き出しが増えていく。オンライン対戦や少し遠いショップの大会に顔を出してみるのもおすすめ。仲間がいない時期は、過去の試合の振り返りメモを見直すだけでも、経験を整理する良い時間になる。",
+      goodWith: { code: "FECG", note: "仲間と実戦を重ねて勝ちを狙う同士。あなたの堅実さに、勝負どころの勢いを足してくれる。エースタイプは本番で強いが、振り返りは少し苦手。あなたが試合後に一緒に整理してあげると、お互いの強みが噛み合って、二人とも大会で結果を出しやすくなる。" },
+      inspiredBy: { code: "ALSG", note: "同じく分析で勝ちを狙うのに、一人で理論を突き詰める相手。経験を理屈で裏付ける方法を見せてくれる。策士タイプの準備の細かさに触れると、あなたが実戦で掴んできた感覚に「なぜそうなるか」の理由が付く。経験と理論がつながると、判断の速さも確かさも増していく。" },
+    },
+
+    AECX: {
+      name: "仲間",
+      catch: "人と遊ぶことそのものを楽しむ",
+      desc: "カードゲームを「誰かと一緒に遊ぶ時間」として心から楽しむタイプ。対戦相手の狙いをよく見て、その試合ならではの面白さを見つけるのが上手です。経験を重ねて相手に合わせた遊び方ができるので、初心者からベテランまで誰とでも盛り上がれます。カードを通じて人と人をつなげる、コミュニティの中心にいることが多い存在です。\n\n仲間タイプが選択肢を前にしたとき、考えるのは自分の得だけではありません。「この手を選んだら、相手はどう感じるだろう」「この試合をもっと面白くするにはどうしたらいいか」と、テーブル全体を視野に入れて判断します。分析する力も十分にありますが、その矛先は相手の手札より相手の気持ちに向きやすい。カード選びでも、自分と相手の両方が楽しめるかが大切な基準になっています。\n\n仲間タイプは、対戦相手の表情やデッキの個性をよく観察しています。相手が初心者なら全力で叩きのめすのではなく、相手のやりたいことが見える展開を作り、試合後に「あそこはこうするともっと強いよ」とさりげなく伝える。ベテラン相手なら真剣勝負を楽しむ。相手によって遊び方を変えられるのは、たくさんの人と遊んできた経験があるからです。\n\n仲間タイプの強みが表れるのは、初めて遊ぶ人や、実力差のある相手とテーブルを囲んだときです。相手の表情から緊張や戸惑いを読み取り、自然な声かけと試合運びで、勝ち負けを超えて「また遊びたい」と思える時間を作り出すことができます。\n\n周りからは「一緒にいると楽しい人」「初めての人でも安心して対戦できる相手」と思われています。ショップに顔を出すと自然と人が集まってきて、気づけば対戦の輪の真ん中にいる。いちばん充実を感じるのは、自分が誘った友達がゲームの面白さに目覚めて、目を輝かせながら次の対戦をせがんでくる瞬間。その笑顔を見るために遊んでいるところがあります。\n\n勝ったときは相手とハイタッチしたくなり、負けたときも「今の試合、面白かったね」と言える。勝敗以上に、テーブルを囲んだみんなが楽しめたかどうかを大事にしているのが仲間タイプらしさです。\n\n気づきにくいのは、場を楽しくすることに気を配りすぎて、自分自身が心から楽しめているかを見落としてしまうことです。相手に合わせて加減しているうちに、本気で戦う感覚が鈍っていることもあります。ときどき自分のためだけに遊ぶ時間を持つと、仲間タイプの持つ「場を温める力」は、さらに自然で無理のないものになっていきます。",
+      aruaru: [
+        "勝っても負けても「もう1戦やろう」と言っている。気づけば同じ相手と5戦目で、勝ち越しているかどうかもよく分からないけれど、とにかく楽しい",
+        "友達に布教するためのデッキを、自分の分とは別に組んでいる。初めての人でも動かしやすいように調整してあり、貸したまま返ってこないこともある",
+      ],
+      strengths: [
+        "誰とでも楽しい試合を作れる。相手に合わせて、お互い笑顔で終われる展開にできる",
+        "相手の考えを汲み取る観察力。表情や手の動きから相手の狙いを読み、試合中も試合後も気の利いた対応ができる",
+        "コミュニティを広げる力。新しい人をゲームに誘い、居心地のいい場を作るので、周りに自然と人が集まる",
+      ],
+      cautions: [
+        "周りに合わせすぎて、自分のやりたいことを我慢しがち。相手が楽しめるかを優先するあまり、自分が本当に使いたいデッキを出す機会が減っていることも",
+        "真剣勝負の場では、気持ちの切り替えが必要になることも。普段の楽しい雰囲気のまま大会に出ると、相手の本気に少し戸惑ってしまう場面がある",
+      ],
+      play: "相手の狙いを読みつつ、お互いが楽しめる展開を大切にする。盤面の面白さに素直に反応する。相手がすごいプレイをすれば素直に驚き、褒める。勝ち筋が見えていても、相手の見せ場がありそうなときは少し様子を見ることもある。テーブル全体の空気を読みながら、試合を一緒に作っていく感覚。",
+      deck: "仲間と遊ぶためのデッキ、布教用のデッキなど、対戦相手の顔を思い浮かべて組むことが多い。強すぎて相手が何もできないデッキより、お互いに見せ場が生まれるデッキを好む。初心者向けに動きが分かりやすいデッキを用意したり、友達のデッキと戦うと盛り上がる構築を考えたりするのが楽しい。",
+      advice: "ときには「自分が本当に使いたいデッキ」を最優先で組んでみよう。あなたが楽しんでいる姿が、いちばんの布教になる。また、たまには小さな大会に出て、本気の相手と真剣勝負をしてみるのもおすすめ。そこで得た経験は、仲間と遊ぶときの引き出しをさらに増やしてくれる。あなたの楽しみ方が広がるほど、周りの楽しさも広がっていく。",
+      goodWith: { code: "FECX", note: "仲間と遊ぶ時間を楽しむ同士。一緒にいると、場がもっと明るく盛り上がる。遊び人タイプが思い切ったプレイで場を沸かせ、あなたが周りの人を自然に巻き込んでいく。二人がいるテーブルには、初めての人でも入りやすい空気が生まれる。" },
+      inspiredBy: { code: "ALSX", note: "同じく分析好きで楽しさ重視なのに、一人で研究に没頭する相手。遊び方に新しい発見を持ち込んでくれる。研究者タイプが見つけてきた珍しい組み合わせは、仲間内の対戦会の格好の話題になる。あなたがそれをみんなで遊べる形にすると、研究者の発見が場の盛り上がりに変わる。" },
+    },
+
+    // ===================================================== 発想理論（F × L）
+    FLSG: {
+      name: "天才",
+      catch: "独自の発想を理論に変える",
+      desc: "ひらめいたアイデアを、理論で裏付けて武器にするタイプ。「これはいけそう」というひらめきを出発点に、一人で検証を重ねて勝てる形へ仕上げていきます。周りが思いつかない角度から攻める構築やプレイを好み、それが結果につながったときに大きな手応えを感じます。発想と理屈を行き来して答えを作る、独創派の挑戦者です。\n\n天才タイプの思考は、ひらめきと検証を行ったり来たりします。対戦中に「この手があるかも」と浮かんだら、すぐに頭の中で損得を計算し、成立すると分かった瞬間に迷わず実行する。カードを選ぶときも、まず「このカードで何か面白いことができそう」という直感が先にあり、そのあとで確率や相性を厳しく詰めていきます。発想の自由さと詰めの厳しさが同居しているのが、このタイプの大きな特徴です。\n\n天才タイプのアイデアは、ふとした瞬間に降ってきます。カードリストを眺めているとき、ほかのデッキと対戦しているとき、まったく関係ない時間にも。でも、ひらめきで終わらせないのがこのタイプ。そのアイデアが本当に勝てるのか、確率や相性を理屈で確かめ、穴があれば埋めていく。「面白い」を「勝てる」に変換する作業を、一人で黙々と続けます。\n\n天才タイプの強みが光るのは、環境が固まりきって、みんなが同じようなデッキを使い始めた時期です。誰もが当たり前だと思っている前提を疑い、その隙間を突く構築を一人で仕上げてくる。流れを変える一手を持ち込めるのが、このタイプの真骨頂です。\n\n周りからは「何をしてくるか分からない人」「発想が独特な人」と見られがちです。大会で当たった相手には強く印象に残り、試合後にデッキリストを見せてほしいと頼まれることも少なくありません。充実を感じるのは、誰にも理解されなかったアイデアが結果を出し、周りの評価がひっくり返った瞬間。自分の頭の中にしかなかった答えが、現実で証明される快感があります。\n\n勝ったときは、自分だけの答えが環境に通用した喜びが大きい。負けたときは「アイデアが悪かったのか、詰めが甘かったのか」を冷静に切り分けて、次の改良に向かいます。ひらめきと理屈の両方に責任を持つのが天才タイプらしさです。\n\n気づきにくいのは、新しいアイデアへの興味が強いぶん、すでに通用している自分の構築まで必要以上に変えたくなってしまうことです。また、一人で考えを詰めきってしまうため、周りから見ると「急に結論が出てくる人」に映ることもあります。ひらめきの途中経過を少しだけ人に見せるようになると、意外なところから次のアイデアの種が返ってきます。",
+      aruaru: [
+        "思いついたコンボを、気づいたら深夜まで検証している。「寝る前にちょっとだけ」のつもりが、成立条件と勝てる対面のリストまで完成していた",
+        "大会で使ったデッキを見た人に「それ何？」と聞かれる。説明すると「よく思いついたね」と言われるが、本人にとっては筋道の通った結論にすぎない",
+      ],
+      strengths: [
+        "誰も試していない角度からの発想。定番の構築では見落とされているカードや動きに目をつけられる",
+        "ひらめきを形にする検証力。思いつきを理屈で詰めて、大会で通用するレベルまで仕上げられる",
+        "意表を突く構築で流れを変える力。相手が対策していない動きで、環境の前提そのものを揺さぶれる",
+      ],
+      cautions: [
+        "ひらめきと理論のどちらかに寄りすぎると、判断がぶれやすい。アイデアに惚れ込みすぎると検証が甘くなり、理屈にこだわりすぎると発想の面白さが消えてしまう",
+        "自分の中で完結しやすく、人への説明を省きがち。チームで動く場面では、なぜそのアイデアが強いのかを言葉にしないと、周りがついてこられないことも",
+      ],
+      play: "一見セオリー外の選択にも、自分なりの根拠を持って踏み込む。相手の想定を外すのが得意。相手が「普通はこうする」と読んでいる場面で、別の勝ち筋を選んで流れを変える。試合中にひらめいた手も、その場で損得を素早く計算してから使うので、奇抜に見えて実は理にかなっている。",
+      deck: "独自のアイデアを軸に、理論で穴を埋めて勝てる構築に仕上げる。オリジナルデッキで大会に出ることも。まず核となるひらめきがあり、そのアイデアを最大限に活かせるよう、残りの枠を確率と相性の計算で固めていく。環境の定番カードも、自分の構築に必要なら迷わず取り入れる柔軟さを持っている。",
+      advice: "アイデアを試すときは、比較のために定番の構築も一緒に回してみよう。独自案の強みと弱みがはっきり見えてくる。また、ひらめいたアイデアを一度誰かに説明してみるのもおすすめ。言葉にする過程で理屈の穴が見つかったり、相手の反応から新しい改良のヒントが得られたりする。定番と比べて勝てる理由を言えるアイデアは、本番でも頼れる武器になる。",
+      goodWith: { code: "ALSG", note: "一人で勝ち筋を研究する同士。あなたのひらめきを、隙のない理屈で固めてくれる。策士タイプは環境の分析が得意。あなたのアイデアが環境のどこに刺さるのかを、策士が客観的に見極めてくれる。発想と分析で、お互いの研究の精度を上げられる関係。" },
+      inspiredBy: { code: "FECG", note: "同じくひらめきで勝ちを狙うのに、仲間と実戦で磨く相手。本番の場での勝負勘を見せてくれる。エースタイプは、理屈より先に体が動くタイプ。あなたが一人で詰めたアイデアを、エースが大会の空気の中でどう使いこなすかを見ると、理論だけでは分からない実戦の強さに気づける。" },
+    },
+
+    FLSX: {
+      name: "発明家",
+      catch: "新しい可能性を見つけ出す",
+      desc: "頭の中でひらめいた組み合わせを、理屈を使って形にしていくのが好きなタイプ。勝つことよりも「まだ誰も見たことのない動き」を生み出すことにワクワクします。一人でカードリストを眺め、思いついたアイデアを試し、仕組みを理解していく過程を楽しめるのが魅力。新弾発表の日がいちばんのお祭りです。\n\n発明家の思考は、一つのアイデアから枝分かれするように広がっていきます。カードを見ると「この効果を別の目的に使えないか」と発想を飛ばし、浮かんだ候補を理屈で一つずつ組み立てて、本当に動くかどうかを確かめる。対戦中に迷ったときも、より勝ちやすい手より「まだ試したことのない手」に気持ちが傾きがちです。カード選びの基準は、新しい動きを生み出す部品になれるかどうかです。\n\n発明家の頭の中には、いつもいくつものアイデアが同時に走っています。新しいカードの情報を見た瞬間に「あのカードと組み合わせたら？」「この効果を逆に使ったら？」と連想が広がり、その仕組みを理屈で組み立てていく。試作品のデッキは次々に生まれ、机の上やアプリの中は未完成のリストでいっぱいになっていきます。\n\n発明家の強みが表れるのは、新弾が発売された直後の、まだ誰も正解を知らない時期です。カードリストを見た瞬間から組み合わせのアイデアが次々と湧き、周りが様子を見ている間に、もういくつもの試作品を形にしている。その発想の量は大きな財産です。\n\n周りからは「いつも新しいことを考えている人」「見たことのないデッキを持ってくる人」と思われています。対戦相手からは、次に何が飛び出すか分からないワクワク感を楽しまれることも多いでしょう。いちばん充実を感じるのは、頭の中にしかなかった動きが初めて実際のテーブルの上で完成した瞬間。その試合の勝敗がどうであれ、その日は良い一日だったと思えます。\n\n勝つと「この発明はちゃんと動く」と確かめられて嬉しいし、負けても「次はこのパーツを変えてみよう」とアイデアが湧いてくる。勝敗はあくまで実験の結果の一つで、新しいものを生み出し続けられることこそが、発明家にとっての一番の楽しみです。\n\n気づきにくいのは、アイデアを生み出す楽しさに夢中になるあまり、一つの発明を十分に使いこなす前に次へ移ってしまうことです。そのため、自分の発明の本当の実力を、実は自分でもよく知らないままになっていることがあります。気に入った発明を一つだけでも長く使い込んでみると、思っていた以上の可能性がその中に眠っていることに気づくはずです。",
+      aruaru: [
+        "新弾の情報が出た瞬間、もうコンボを3つ考えている。公式の発表を見ながらメモアプリを開き、まだ手元にないカードで組むデッキの名前まで決めている",
+        "組んだデッキの数が、大会で使ったデッキの数よりずっと多い。棚には試作品のデッキケースが並び、中身を思い出すにはリストを見返す必要がある",
+      ],
+      strengths: [
+        "新しい組み合わせを生み出す発想力。カード同士の意外なつながりを見つけ、誰も見たことのない動きを作れる",
+        "アイデアを理屈で組み立てる力。思いつきを、実際に動く手順と必要なカードの構成に落とし込める",
+        "未知のカードを楽しめる柔軟さ。評価の定まっていない新カードにも、先入観なく可能性を探しにいける",
+      ],
+      cautions: [
+        "アイデアが次々に出て、一つを仕上げる前に次へ移りがち。どのデッキも7割の完成度で止まり、本当のポテンシャルを確かめきれないことも",
+        "面白さを優先する分、試合ごとの結果に波が出やすい。発明の動きが決まれば痛快だが、決まらなかった試合では何もできずに終わる場面もある",
+      ],
+      play: "自分のデッキならではの動きを決めることを楽しむ。想定外の展開も新しい発見として受け止める。試合中に「この盤面なら、あのカードでこんなこともできるのでは」と新しい使い方をひらめくことも多い。相手のカードの効果にも興味津々で、試合のあとに自分のアイデアに取り入れていたりする。",
+      deck: "新カードやマイナーカードを起点に、ゼロから組み上げる。完成形より試作品のほうが多い。まず「この動きを実現したい」というゴールがあり、そのために必要なカードを理屈で揃えていく。定番のカードよりも、自分の発明を支える専用パーツを優先して採用するため、ほかに似た構築がない個性的なデッキに仕上がる。",
+      advice: "試作デッキの中から1つ選んで、完成するまで回し込んでみよう。仕上げきった1つが、次の発明の土台になる。完成の目安を「20戦回して、動きに納得できたら」などと決めておくと区切りをつけやすい。発明したデッキを写真やリストで記録して人に見せると、新しいアイデアのヒントが返ってくることも。",
+      goodWith: { code: "ALSX", note: "一人で答えを探す同士。あなたの発明の仕組みを、一緒に解き明かしてくれる。研究者タイプは、あなたが感覚で組んだコンボの成立条件を細かく検証してくれる。発明が理屈で裏付けられると、自信を持って次のアイデアへ進めるようになる。" },
+      inspiredBy: { code: "FECX", note: "同じくひらめきと楽しさを大事にしながら、仲間と遊んで発見する相手。発明を人に見せる楽しさをくれる。遊び人タイプとあなたの発明デッキで対戦すると、思いもよらないリアクションが返ってくる。人と遊ぶ中で発明が磨かれていく楽しさに気づかせてくれる。対戦相手の驚く顔が、次の発明の原動力になる。" },
+    },
+
+    FLCG: {
+      name: "リーダー",
+      catch: "自分の閃きでチームを動かす",
+      desc: "ひらめいたアイデアを理論で整理し、仲間を巻き込んで勝利へ向かうタイプ。「この方向でいこう」と方針を示し、周りの意見も取り入れながらチームで形にしていくのが得意です。ひらめきで見えた可能性を言葉にして共有できるので、自然と人が集まってきます。みんなで結果を出すことに大きなやりがいを感じる、旗振り役です。\n\nリーダーの思考は、ひらめいた瞬間から「これをどう伝えるか」に向かって動き出します。対戦中の判断は直感が起点ですが、その直感をすぐに言葉に置き換え、自分にも周りにも説明できる形に整えていく。カードを選ぶときも、自分が使って強いかどうかに加えて、チームの方針の柱になれる1枚かどうかを考えます。決断までの速さと、それを言葉にする速さを兼ね備えているのが特徴です。\n\nリーダーの強みは、ひらめきを「みんなが動ける言葉」に変えられることです。環境を見て「今回はこのデッキが穴だ」と直感したら、その理由を理屈で説明し、仲間を納得させる。決断が早く、迷っているチームに方向を示せるので、大会前の空気を一気に前向きにできます。仲間の意見を聞いて作戦を修正する柔軟さも持っています。\n\nリーダーの強みが際立つのは、大会前にチームの意見が割れて、話し合いが止まってしまった場面です。ひらめいた方向性を分かりやすい言葉で示し、それぞれの意見の良いところを拾いながら決断を下す。止まっていたチームを再び前へ動かす力があります。\n\n周りからは「一緒にいると前向きになれる人」「迷ったときに方向を示してくれる人」と見られています。話す言葉に勢いがあるので、初対面の場でも自然と人の輪の中心に立っていることが多いタイプです。充実を感じるのは、自分が言い出した作戦にチーム全員が乗ってくれて、大会の会場でその作戦が次々と決まっていく瞬間。仲間の喜ぶ顔が何よりの報酬です。\n\n勝ったときはチーム全員で喜びを分かち合い、自分の判断が仲間の力で結果に変わったことに大きな手応えを感じます。負けたときも、方針を出した責任を引き受けて「次はこう変えよう」と前を向かせる。チームの士気を支えるのがリーダーらしさです。\n\n気づきにくいのは、自分の言葉に勢いがある分、周りが本当は迷っていても「みんな賛成している」と受け取ってしまうことです。また、新しいひらめきが浮かぶと、前に示した方針を自分で塗り替えたくなる場面もあります。決めた方針をしばらく貫く粘り強さが加わると、リーダーの発想はチームにとって、より確かで頼れる道しるべになります。",
+      aruaru: [
+        "「次の大会、これで行こう」と言い出すのはたいていこの人。理由を聞かれると、ひらめいたきっかけから勝てる根拠までその場で筋道立てて話せてしまい、迷っていた仲間までいつの間にか乗り気になっている",
+        "思いつきを話していたら、いつの間にかチームの方針になっていた。気づけば練習日程まで決まっていて、言い出した責任を感じつつも楽しんでいる",
+      ],
+      strengths: [
+        "方向性を示して人を巻き込む力。迷っているチームに明確な目標を示し、全員の動きを一つにまとめられる",
+        "ひらめきを分かりやすく伝える力。直感で見えた可能性を、仲間が納得できる理屈と言葉で説明できる",
+        "チームで勝つことへの推進力。練習会の提案から当日の声かけまで、チームを前へ進めるエネルギーがある",
+      ],
+      cautions: [
+        "思いつきが先行して、仲間が追いつけないことも。次々とアイデアを出すうちに、前の方針の準備が終わらないまま新しい案に切り替わってしまう",
+        "決断が早い分、反対意見に耳を傾ける時間も意識したい。勢いのある提案には周りも乗りやすいが、懸念を言い出しにくい雰囲気を作ってしまうことがある",
+      ],
+      play: "ひらめきで流れを読み、勝負どころで思い切った判断をする。その判断の根拠を後から言葉にできる。試合中も「ここが勝負の分かれ目だ」という瞬間を感覚で掴み、そこに向けて準備を整える。チーム戦では自分の試合を進めながら仲間にも声をかけ、全体の流れを良い方向へ引っ張っていく。",
+      deck: "アイデアを仲間と共有し、意見を取り入れながら大会用のリストに仕上げる。最初の構想は自分のひらめきから生まれるが、仲間の指摘で採用カードを入れ替えることも多い。チーム全員が同じ方針で準備できるよう、デッキの狙いと各カードの役割を分かりやすく共有する。",
+      advice: "方針を決める前に、仲間一人ひとりの意見を一度聞く時間を作ろう。全員が納得した作戦は、本番でぶれにくい。新しいアイデアが浮かんだときは、すぐに共有する前に「今の方針の準備は終わっているか」を確認するのもおすすめ。ひらめきを出すタイミングを選べると、チームの力を最大限に引き出せる。",
+      goodWith: { code: "ALCG", note: "仲間と勝ちを目指す同士。あなたのアイデアを、具体的な段取りに落とし込んでくれる。司令塔タイプは、あなたが示した方向性を練習計画や役割分担に整理してくれる。あなたが旗を振り、司令塔が地図を描く。二人がそろうとチームの動きが一気に速くなる。" },
+      inspiredBy: { code: "FESG", note: "同じくひらめきで勝ちを狙うのに、一人で実戦を重ねる相手。単独で勝ち切る鋭さを見せてくれる。ハンタータイプは、チームの議論を待たずに強いものを嗅ぎ当てて結果を出してくる。その身軽さに触れると、自分一人の判断で勝負を決める力も磨いてみたくなる。" },
+    },
+
+    FLCX: {
+      name: "案内人",
+      catch: "自分の知識を人と分かち合う",
+      desc: "感覚で掴んだカードゲームの面白さを、理屈を添えて人に伝えるのが得意なタイプ。新しく始めた人に遊び方を教えたり、デッキの魅力を語ったりする時間が好きで、気づけば周りの人の「入口」になっています。勝ち負けよりも、みんながゲームを楽しめているかを大事にする、コミュニティの道しるべです。\n\n案内人の思考は、感じ取った面白さを言葉に翻訳する作業と深く結びついています。新しいカードを見たとき、最初に浮かぶのは「これは楽しい」という感覚。そこから「なぜ楽しいのか」を理屈でたどり、人に説明できる形に整えていきます。対戦中の選択でも、勝ちやすさに加えて「この試合が相手にとって良い経験になるか」を、自然と判断材料に入れているのが特徴です。\n\n案内人は、ゲームの面白さを感覚でつかむのが早いタイプです。新しいカードを見て「これは楽しい動きになる」とピンときたら、その理由をかみくだいて言葉にし、人に伝える。初心者が分からないところでつまずいていれば、ルールだけでなく「なぜこのゲームが面白いのか」から教えてくれます。教えるのがうまいのは、相手がどこで迷うかを感覚で分かっているからです。\n\n案内人の強みが表れるのは、初心者が混ざった対戦会や、新しく始めた友達に遊び方を教える場面です。相手がつまずきそうな所を先回りして説明し、最初の一勝を体験させてあげられる。その気配りが、ゲームを好きになる人を一人ずつ増やしていきます。\n\n周りからは「教え方がうまい人」「このゲームの入口になってくれた人」と思われています。初心者からの質問にも面倒がらずに答え、相手のレベルに合わせて話し方を変えられるので、気づけば多くの人に頼られています。充実を感じるのは、自分が案内した人がゲームの魅力にハマり、やがて自分の言葉でその面白さを語り始めたとき。楽しさのバトンが渡った手応えがあります。\n\n勝ったときより、自分が教えた人が初めて勝てたときの方が嬉しいこともあります。負けても、その試合の面白かったポイントを誰かに語れれば十分楽しい。自分の知識が人の楽しさにつながることにやりがいを感じているのが、案内人らしさです。\n\n気づきにくいのは、人に伝えることに力を注ぐあまり、自分自身の上達への欲を後回しにしてしまうことです。また、相手に分かりやすく伝えようとして、自分が本当に感じている複雑な面白さを、簡単な言葉に丸めすぎることもあります。ときには自分だけのために深く遊んでみると、案内できる世界がさらに広がり、語る言葉にも厚みが増していきます。",
+      aruaru: [
+        "初心者に教えていると、説明がどんどん楽しくなってくる。最初はルールの話だったのに、いつの間にかこのゲームの魅力について熱く語っている",
+        "このゲームに引き込んだ友達の数を数えると結構多い。「あなたに教わって始めた」と言われると、その人が自分より強くなっていても素直に嬉しい",
+      ],
+      strengths: [
+        "面白さを言葉にして伝える力。感覚的な楽しさを、初めての人にも伝わる具体的な言葉で説明できる",
+        "初心者にも寄り添える視点。相手がどこでつまずくかを察して、ちょうどいい順番で教えられる",
+        "知識を広く共有する姿勢。自分だけの発見も惜しまずに伝えるので、周りのみんなのレベルが上がっていく",
+      ],
+      cautions: [
+        "教える側に回る時間が増え、自分のプレイ機会が減りがち。対戦会でも説明役をしているうちに、自分は一試合もしていなかったということも",
+        "話が盛り上がって本題からそれることも。面白さを伝えたい気持ちが強いあまり、相手が知りたいことより自分が話したいことが多くなってしまう",
+      ],
+      play: "感覚と知識の両方を使って、展開を楽しみながら最善手を探す。相手と一緒に盤面を楽しめる。試合中も「この盤面、面白いね」と相手と会話しながら進めることが多い。相手が初心者なら、自分の選択の理由をつぶやきながらプレイして、対戦そのものを学びの時間に変えてしまう。",
+      deck: "見ていて楽しい、語れる、人に貸せる。そんな「人に伝えたくなるデッキ」を好む。カードの組み合わせに分かりやすいストーリーがあり、初めて見た人にも狙いが伝わる構築が好き。友達に貸すことを考えて、動かし方が分かりやすい形に整えておくのも案内人らしいこだわり。",
+      advice: "教えるのと同じくらい、自分が教わる側に回る機会も作ろう。新しい視点が入るほど、伝えられることも増えていく。対戦会では「今日は自分のプレイの日」と決めて、説明役を誰かに任せてみるのもおすすめ。自分が本気で遊んだ経験は、そのまま次に教えるときの説得力になる。教わる側の気持ちを思い出すことで、あなたの説明もさらに伝わりやすくなる。",
+      goodWith: { code: "ALCX", note: "仲間と考える時間を楽しむ同士。あなたが伝えたい面白さを、筋道立てて補ってくれる。参謀タイプは、あなたが感覚で語る楽しさに、論理的な説明を付け足すのが得意。二人で初心者に教えると、楽しさと分かりやすさが両方そろった最高の入門講座になる。" },
+      inspiredBy: { code: "FESX", note: "同じくひらめきと楽しさを大事にしながら、一人で未知に飛び込む相手。まだ誰も語っていない面白さを持ち帰ってくれる。開拓者タイプが見つけてきた新しい遊び方は、あなたが言葉にすることで多くの人に届く。発見する人と伝える人として、いい刺激を与え合える。開拓者の身軽さに触れると、あなた自身もまだ知らないカードを試してみたくなるはず。" },
+    },
+
+    // ===================================================== 感覚実戦（F × E）
+    FESG: {
+      name: "ハンター",
+      catch: "強いものを嗅ぎ分け追い求める",
+      desc: "強いカードや勝てるデッキを、鋭い嗅覚で見つけ出すタイプ。理屈よりも「これは来る」という感覚と、実際に回してみた手応えを信じます。一人で試して確信を得たら、迷わず乗り換えて結果を取りに行く行動力が持ち味。環境の変化をいち早く察知して、誰よりも先に動いていることが多い、実戦派の目利きです。\n\nハンターの判断は、驚くほど速く、そして迷いがありません。選択肢を前にすると、細かい計算を始める前に「こっちが強い」という感覚がすでに答えを出しています。その感覚を支えているのは、一人で数多くのデッキを回してきた経験の蓄積です。カードを選ぶときも、前評判や他人の評価より「実際に触ってみて手応えがあるか」を重視し、良いと思えばその日のうちに採用を決めます。\n\nハンターの判断は速い。新しいカードの情報を見た瞬間に「これは環境を変える」と感じ取り、発売日にはもう組んで回し始めています。回してみて手応えがあれば大会へ、なければすぐに次の候補へ。評判が固まる前に動くので、周りがそのデッキの強さに気づく頃には、もう使いこなしていることも珍しくありません。\n\nハンターの強みが光るのは、新しいカードの発売や大きなルール変更で、環境が一気に動いた直後です。評価が定まる前に「これだ」と感じたデッキへ迷わず飛び込み、一人で回しながら手に馴染ませる。その一歩の速さが、そのまま結果の差になります。\n\n周りからは「新しいデッキを誰よりも早く持ってくる人」「流行の一歩先にいる人」と見られています。大会でハンターが使っていたデッキが、数週間後に環境の中心になっていることも珍しくありません。充実を感じるのは、まだ誰も注目していなかった獲物を自分だけが見つけ、それで結果を出せたとき。直感と行動力が報われる、何ものにも代えがたい瞬間です。\n\n勝ったときは、自分の嗅覚が正しかったことに静かな満足を感じます。負けたときも長く引きずらず、「このデッキの旬は終わったかも」と次の獲物を探し始める。過去の成功にとらわれず、常に今いちばん強いものを追い続けるのがハンターらしさです。\n\n気づきにくいのは、次の獲物を探すことに夢中になり、手に入れたデッキの細かな使い方を詰める前に興味が移ってしまうことです。また、自分の嗅覚に自信がある分、ほかの人の地道な研究から得られるヒントを見逃していることもあります。速さにほんの少しの粘りが加わると、ハンターの嗅覚は、さらに確かな結果へと結びついていきます。",
+      aruaru: [
+        "新カードが出て3日後には、もうそのデッキで大会に出ている。周りがまだ様子見をしている間に結果を出し、気づけば流行の火付け役になっている",
+        "「なんか強い気がする」がだいたい当たる。根拠を聞かれてもうまく説明できないのに、数週間後には環境のトップに立っているデッキだったりする",
+      ],
+      strengths: [
+        "強いものを見抜く嗅覚。評価が固まる前の段階で、環境を変えるカードやデッキを感じ取れる",
+        "環境の変化に素早く対応する行動力。強いと思ったらすぐ組んで回し、大会に持ち込むまでの動きが速い",
+        "勝てる形を実戦で確かめる力。感覚で選んだものを実際に回して見極め、使えるかどうかを素早く判断できる",
+      ],
+      cautions: [
+        "感覚で掴んだ強さを、人に説明するのは少し苦手かも。チームで動くときに「なぜこれが強いのか」を伝えきれず、周りがついてこられない場面がある",
+        "乗り換えが早い分、一つのデッキの深掘りは浅くなりがち。デッキの細かな使い方を極める前に次へ移るため、使い込んだ相手に競り負けることも",
+      ],
+      play: "相手の弱いところを嗅ぎ取り、迷わず攻める。試合のテンポが速く、決断も速い。相手のちょっとした迷いや、守りが手薄になった一瞬を見逃さず、そこに全力をぶつける。長考するより、感覚で掴んだ勝ち筋に乗って押し切る試合運びを好み、主導権を握っている時間が長い。",
+      deck: "その時いちばん強いと感じたデッキを素早く組み、回しながら手に馴染ませる。構築の細部よりも、デッキ全体の勢いと強さを重視する。最初は既存のリストをベースにしつつ、回しながら「なんとなく使いにくい」と感じたカードを入れ替えて、自分の手に合う形に変えていく。",
+      advice: "乗り換えたデッキを、次の乗り換えまで回し込んでみよう。嗅覚で選んだ強さに習熟が加わると、勝率がもう一段伸びる。また、強いと感じたデッキについて「どこが強いと思ったのか」を一言だけでもメモしておくのがおすすめ。自分の嗅覚の傾向が見えてくると、次の獲物を見つける精度も上がる。メモがたまれば、仲間に強さを伝えるときの材料にもなる。",
+      goodWith: { code: "AESG", note: "一人で試合を重ねて結果を取りにいく仲間。あなたが嗅ぎ当てた強さを、実戦の読みで裏付けてくれる。勝負師タイプは一つのデッキを使い込むのが得意。あなたが見つけてきた新しいデッキを勝負師が回し込むと、その強さの理由がはっきりしてくる。" },
+      inspiredBy: { code: "FLCG", note: "同じくひらめきで勝ちを狙うのに、仲間と理論で固める相手。チームで勝ちを取る形を見せてくれる。リーダータイプは、ひらめきを言葉にして仲間を動かすのが得意。あなたの嗅覚も、リーダーのように言葉にできれば、チーム全体の武器になる。仲間と勝ちを分かち合う楽しさにも気づかせてくれる。" },
+    },
+
+    FESX: {
+      name: "開拓者",
+      catch: "面白そうな可能性を切り拓く",
+      desc: "「これ、面白そう」と思ったら、まだ誰も踏み込んでいない場所へ真っ先に飛び込むタイプ。理屈で考えるより先に手を動かし、一人であれこれ試す中で予想外の発見を楽しみます。マイナーなカードや新しいデッキへの抵抗が少なく、誰も使っていない構築でも気にしません。あなたが通った後に、新しい遊び方の道ができていることも。\n\n開拓者が選択肢を前にしたとき、まず心が動くのは「まだ見たことがない方」です。結果が読める手より、どうなるか分からない手に惹かれ、考えるより先に試してみることが多い。それは無謀なのではなく、試すこと自体が一番の情報源だと体で知っているからです。カードを選ぶときも、評価の高さより「この1枚で新しい何かが起きそうか」が決め手になっています。\n\n開拓者にとって、カードゲームは未知の地図を広げていく遊びです。まだ評価の定まっていないカード、誰も組んでいないテーマ、変わったルールの遊び方。気になったら考える前にまず組んでみて、実際に回しながら「こう使うと面白い」を見つけていきます。うまくいかなかった試みも、それはそれで一つの発見として楽しめるのが開拓者の強さです。\n\n開拓者の強みが表れるのは、相手が自分のデッキを知らない、まだ誰も見たことのない構築で戦う試合です。相手が対応を考えている間に、予想外の動きで主導権を握る。誰も歩いていない道を進んできた経験が、型にはまらない柔軟な対応力になっています。\n\n周りからは「自由な人」「何を持ってくるか毎回楽しみな人」と見られています。対戦相手が驚いた顔をすると、本人もつられて楽しくなってくるタイプです。充実を感じるのは、誰も気にしていなかったカードが思わぬ活躍を見せ、相手に「そんな使い方があったのか」と言わせたとき。勝ち負け以上に、その一言を聞くためにデッキを組んでいるところがあります。\n\n勝ったときは、誰も知らなかった道で結果を出せたことが痛快。負けても「この道はこう行き止まるのか」と分かったことが収穫になります。結果よりも、新しい景色を見られたかどうか。それが開拓者にとっての一日の満足度を決めています。\n\n気づきにくいのは、新しいものへの好奇心が強い分、うまくいきかけた発見を自分で手放してしまうことがある点です。また、自由に試すスタイルが、真剣に勝ちたい相手には予測しにくく、戸惑わせてしまう場面もあります。発見したことの中から一つを選んで少し深く掘り下げてみると、開拓した道が、ほかの人も歩ける大きな道に変わっていきます。",
+      aruaru: [
+        "「なにそのデッキ」と言われるのがちょっと嬉しい。対戦相手がカードの効果を読み込んでいる間に、どうやってこの組み合わせを思いついたか話したくなっている",
+        "パックを開けたその日に、出たカードでデッキを組んでいる。レアカードより、ほかの人が見向きもしない1枚に心を惹かれて、その日の夜に一人で回している",
+      ],
+      strengths: [
+        "新しいものへ真っ先に踏み出す行動力。評価が定まっていないカードでも、迷わず手に取って試せる",
+        "予想外の展開を楽しめる柔軟さ。計画どおりにいかない試合でも、むしろその状況を面白がって対応できる",
+        "型にはまらない自由な発想。定番の使い方にとらわれず、カードの新しい活かし方を実際に見つけられる",
+      ],
+      cautions: [
+        "気分によって熱量に波が出やすい。夢中になったときの行動力はすごいが、興味が別に移ると、組みかけのデッキがそのまま眠ってしまうことも",
+        "面白さを優先するので、大会では安定感も意識したい。尖った構築は決まれば強いが、相手によっては噛み合わずに苦しい試合が続くこともある",
+      ],
+      play: "その場のひらめきを大切にして、思い切ったプレイを選ぶ。予定外の展開にも楽しんで対応できる。手札と盤面を見て「今これをやったら面白いかも」と感じたら、迷わず試してみる。定石から外れた動きで相手を驚かせることも多く、その一手が試合の流れを大きく変えることもある。",
+      deck: "気になったカードを軸に、まず組んでみて回しながら形にする。デッキの種類がとにかく多い。最初から完成形を目指すのではなく、とりあえず動かしてみて、回す中で感じた手応えを頼りにカードを入れ替えていく。誰も組んでいないテーマや、使われていないカードを主役にするのが大好き。",
+      advice: "見つけた面白いデッキは、写真やメモで記録を残そう。あとで振り返ると、自分だけの発見の地図ができあがる。特に手応えのあった1つは、少しだけ長く回し込んでみるのもおすすめ。開拓した道を整えておくと、大会でも通用する自分だけの武器になることがある。記録を見返せば、次に開拓したい方向も自然と見えてくる。",
+      goodWith: { code: "AESX", note: "一人で好きなことに没頭する同士。あなたが見つけた道を、丁寧に磨き上げてくれる。職人タイプは、一つのデッキを細かく調整するのが得意。あなたが開拓した新しい構築を職人に渡すと、思いもよらない完成度に仕上げてくれることがある。" },
+      inspiredBy: { code: "FLCX", note: "同じくひらめきと楽しさを大事にしながら、仲間に知識を伝える相手。発見を人に届ける方法を見せてくれる。案内人タイプは、面白さを言葉にして多くの人に伝えるのが得意。あなたが見つけた道も、案内人のように紹介すれば、たくさんの人が歩き始めるかもしれない。発見を伝える喜びを知ると、開拓の楽しさもさらに増す。" },
+    },
+
+    FECG: {
+      name: "エース",
+      catch: "センスと経験で勝負を制する",
+      desc: "仲間と対戦を重ねて磨いた感覚で、勝負どころを掴み取るタイプ。細かい計算より「ここだ」という瞬間を見逃さない判断力が持ち味で、プレッシャーのかかる場面ほど集中力が増します。練習や大会の空気から多くを吸収し、それを次の試合ですぐ形にできるのが強み。チームでは切り込み役を任されることが多い存在です。\n\nエースの判断は、試合の空気を読むところから始まります。相手の手の止まり方、残り時間、会場のざわめき。言葉にしにくい情報を体で受け取り、「今だ」と感じた瞬間に一気に勝負をかける。その感覚は、仲間との練習で何度も勝負どころを経験してきたからこそ磨かれたものです。カードを選ぶときも、理屈より「この1枚を握っていると安心して戦えるか」を大切にしています。\n\nエースの感覚は、仲間との練習と本番の緊張感の中で研ぎ澄まされてきました。相手の手の動き、試合の流れ、会場の空気。言葉にはしにくいけれど確かにある情報を拾い集め、勝負を決める一瞬に変えます。仲間の試合を見ているだけでも多くを吸収できるので、上手い人と一緒にいる時間が長いほど、自然とプレイの幅が広がっていきます。\n\nエースの強みが際立つのは、決勝や勝ち抜けがかかった、プレッシャーの大きい一戦です。周りが緊張で手を止める場面でも、仲間との練習で培った勝負勘を信じて迷いなく攻め込める。大舞台になるほど集中力が増すのが、エースならではの持ち味です。\n\n周りからは「本番に強い人」「チームの切り札」と見られています。大事な試合ほど落ち着いて見えるので、仲間からは頼もしく、対戦相手からは手ごわく映るでしょう。充実を感じるのは、チームの勝敗がかかった一戦で、仲間の声援を背に勝ち切ったとき。その瞬間の高揚感は、練習で何百勝しても味わえない、本番だけの特別なものです。\n\n勝ったときは、仲間と一緒に盛り上がるのが何よりの喜び。負けたときは悔しさを隠さず、その気持ちを次の練習のエネルギーに変えます。チームの勢いを背負って試合に臨み、その勢いを結果で返そうとするのがエースらしさです。\n\n気づきにくいのは、本番での強さに自信があるぶん、練習での細かな修正を軽く見てしまうことです。また、うまくいった理由を感覚のままにしておくため、調子を崩したときに立て直す手がかりが見つけにくいこともあります。勝負どころの感覚を少しずつ言葉にして残しておくと、エースの強さは日によるムラの少ない、安定したものになっていきます。",
+      aruaru: [
+        "決勝卓になると、なぜかいつもより落ち着いている。予選では緊張していたのに、注目が集まるほど集中力が上がり、普段以上のプレイが出る",
+        "プレイの理由を聞かれて「なんとなく」と答えるが、だいたい合っている。あとで仲間が検証すると、それが最善手だったと分かって驚かれることも。本人は「やっぱりね」と言いつつ内心ほっとしている",
+      ],
+      strengths: [
+        "本番での集中力と決断力。大事な場面ほど感覚が冴え、迷わずに勝負を決める一手を選べる",
+        "経験から磨かれた勝負勘。言葉にしにくい試合の流れや相手の気配を読み取り、判断に活かせる",
+        "仲間との練習から吸収する速さ。人のプレイを見て良いと感じたものを、すぐに自分の動きに取り入れられる",
+      ],
+      cautions: [
+        "感覚で判断した場面を後から振り返る習慣があると、さらに伸びる。うまくいった理由もいかなかった理由も感覚のままだと、同じ失敗を繰り返すことも",
+        "その日の調子がプレイに出やすい。乗っているときは手がつけられないほど強いが、流れが悪い日は判断が雑になってしまうことがある",
+      ],
+      play: "試合の流れを感覚で掴み、勝負どころで一気に攻める。相手の迷いを見逃さない。序盤は相手の様子をうかがいながら、どこで勝負を仕掛けるかのタイミングを探る。そして「ここだ」と感じた瞬間に、持てる力を一気に注ぎ込む。その思い切りの良さが、相手に大きなプレッシャーを与える。",
+      deck: "仲間と回して手応えのあったデッキを、大会の空気を読んで選ぶ。使い慣れたデッキで真価を発揮する。細かい構築理論より、自分の手に馴染むかどうかを重視する。仲間からのアドバイスを素直に取り入れ、練習で試してしっくりきたカードを採用していくので、自然と完成度の高いリストになる。",
+      advice: "大会のあと、勝負を分けた1場面だけ仲間と振り返ってみよう。感覚で選んだ一手に言葉が付くと、調子の波が小さくなる。また、調子が悪いと感じた日のために、試合前に必ず確認する簡単なルーティンを決めておくのもおすすめ。感覚が鈍っているときでも、最低限の判断の質を保ちやすくなる。ルーティンは「相手の残りの手札とリソースを数える」くらいの簡単なものでいい。",
+      goodWith: { code: "AECG", note: "練習相手と切磋琢磨して勝ちにいく者同士。あなたの勝負勘を、冷静な振り返りで支えてくれる。実戦家タイプは、試合のあとに何が良かったのかを一緒に整理してくれる。あなたの感覚と実戦家の振り返りがそろうと、お互いの成長スピードがぐんと上がる。" },
+      inspiredBy: { code: "FLSG", note: "同じくひらめきで勝ちを狙うのに、一人で理論に仕上げる相手。感覚を武器に変える方法を見せてくれる。天才タイプは、ひらめきを理屈で詰めて形にする。その姿に触れると、あなたが本番で感じている「ここだ」という感覚も、言葉にして磨けることに気づける。" },
+    },
+
+    FECX: {
+      name: "遊び人",
+      catch: "勝敗も含めてゲームを楽しみ尽くす",
+      desc: "勝っても負けても、そのすべてをひっくるめてカードゲームを楽しめるタイプ。仲間と対戦して笑い、ときには本気で悔しがる。それも全部が楽しみの一部です。ひらめきと経験で場の空気を読み、相手も自分も盛り上がる試合を作るのが得意。ゲームを長く楽しみ続ける秘訣を、誰よりも自然に知っている存在です。\n\n遊び人が選択肢を前にしたとき、真っ先に考えるのは「どっちが面白くなるか」です。勝ちやすさを無視しているわけではなく、面白い展開の中に勝ち筋を見つけるのが得意なのです。経験から培った感覚で、場が一番盛り上がる一手を嗅ぎ分け、思い切って打ち込む。カードを選ぶときも、強さより「これが決まったら絶対に盛り上がる」という期待感が大きな決め手になっています。\n\n遊び人のまわりには、いつも笑い声があります。劣勢の盤面でも「ここから逆転したら伝説だよね」と楽しみ、思い切った一手で場を沸かせる。勝負にこだわらないわけではなく、本気で悔しがり、本気で喜ぶ。その感情の豊かさが、対戦相手まで楽しい気持ちにさせます。仲間と遊んだ経験の数だけ、場を盛り上げる引き出しが増えています。\n\n遊び人の強みが表れるのは、圧倒的に不利な盤面に追い込まれたときです。普通なら諦めてしまう状況でも、最後まで逆転の可能性を楽しみながら探し続け、思い切った一手で流れをひっくり返すことがある。その諦めない明るさが、奇跡のような逆転を呼び込みます。\n\n周りからは「一緒に遊ぶと絶対楽しい人」「ショップのムードメーカー」と思われています。勝っても負けても場の空気を明るく保てるので、初めて来た人もこの人の近くなら安心して遊べます。充実を感じるのは、仲間と一緒に大笑いした試合のあと。帰り道でもその試合の話で盛り上がれるような一日が、遊び人にとっての最高の一日です。\n\n勝ったときは全力で喜び、負けたときは全力で悔しがったあと、すぐに笑って「もう一回！」。大会の結果よりも、帰り道に仲間と語り合える面白い試合があったかどうかを大事にする。それがゲームを長く楽しむ遊び人の流儀です。\n\n気づきにくいのは、楽しい雰囲気を大切にするあまり、自分の本気の悔しさを笑いでごまかしてしまうことです。また、ロマンのある一手を優先しすぎて、確実に勝てた試合を落としていても気づかないことがあります。悔しさも楽しさの一部として素直に受け止めると、遊び人のプレイはさらに深みを増し、仲間と過ごす時間ももっと濃いものになっていきます。",
+      aruaru: [
+        "負けた試合の話を、勝った試合より楽しそうに語る。「あそこで引いたカードがまさかの」と身振り手振りで再現して、聞いている仲間まで笑わせている",
+        "大会帰りのごはんが、実はいちばんの楽しみ。結果がどうであれ、仲間とその日の名場面を語り合う時間のために大会に出ている気がしている",
+      ],
+      strengths: [
+        "どんな試合からも楽しさを見つける力。不利な展開や負け試合でも、面白いポイントを見つけて前向きに楽しめる",
+        "場を明るくするムードメーカー。テーブルの空気を和ませ、初めての人でも気軽に参加できる雰囲気を作れる",
+        "肩の力が抜けた柔軟なプレイ。勝敗へのプレッシャーに縛られないので、思い切った選択がのびのびとできる",
+      ],
+      cautions: [
+        "楽しさ優先で、細かい振り返りは後回しになりがち。同じパターンの負けを何度か繰り返しても、楽しかった記憶の方が強く残ってしまうことも",
+        "本気で勝ちたい人と遊ぶときは、温度感を合わせる意識があると◎。自分の楽しみ方が、真剣な相手には軽く見えてしまう場面もある。大会では、相手のペースに合わせる意識を少しだけ持っておきたい",
+      ],
+      play: "その場の流れと感覚を楽しみ、思い切った一手も恐れない。逆転の可能性がある限り盛り上がる。不利な状況でも「何か面白いことができないか」と盤面を探し、一発逆転の可能性に賭けることも多い。相手の好プレイには素直に感心し、試合中から会話を楽しみながら一緒にゲームを作っていく。",
+      deck: "好きなカード、面白い動き、仲間がびっくりする仕掛け。楽しさを詰め込んだデッキを組む。強さの計算より「これが決まったら盛り上がる」というロマンを優先することも。仲間内で話題になったカードを取り入れたり、対戦相手が笑ってしまうような仕掛けを考えたりするのが好き。",
+      advice: "いちばん盛り上がった試合を、仲間と一緒に振り返ってみよう。楽しかった理由が分かると、次の試合はもっと面白くなる。あわせて、負けが続いたパターンを一つだけ見つけて対策してみるのもおすすめ。ほんの少し勝てる場面が増えると、ロマンが決まる回数も増えて、楽しさがさらに広がる。楽しむ力と勝つ工夫がそろえば、あなたはもっと手ごわい遊び人になる。",
+      goodWith: { code: "AECX", note: "仲間と遊ぶ時間を楽しむ同士。あなたが作った盛り上がりを、場全体に広げてくれる。仲間タイプは周りの人をよく見て、みんなが楽しめる空気を作るのが得意。あなたが場を沸かせ、仲間タイプがみんなを巻き込む。二人がいれば対戦会はいつも大盛況。" },
+      inspiredBy: { code: "FLSX", note: "同じくひらめきと楽しさを大事にしながら、一人で新しい動きを発明する相手。遊びのネタを増やしてくれる。発明家タイプが一人で作り上げた珍しいデッキは、あなたと対戦すると何倍も面白くなる。発明家の作品を一緒に楽しむことで、お互いの遊びの幅が広がる。発明家の作品に、あなたの遊び心で新しい使い道を見つけることも。" },
+    },
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- data/legacy.js ---- */
+/**
+ * 移行用データ（旧ブランド時代 → CARDNA）
+ * ------------------------------------------------------------
+ * 2026-10 の改修で、診断名と1軸目のコードを変更しました。
+ *   - 1軸目の右側：I（Intuitive／直感） → F（Flair／ひらめき）
+ *   - 変わったのはコードの文字だけで、質問・スコア計算・境界値（0は左側）は同じです。
+ *
+ * LEGACY_CODE_MAP は「旧コード → 新コード」の対応表です。
+ * 旧コードの共有リンク（例: #IESX）を新しいタイプ解説へ転送するのに使います。
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  root.CARDNA.LEGACY_CODE_MAP = {
+    ALSG: "ALSG", ALSX: "ALSX", ALCG: "ALCG", ALCX: "ALCX",
+    AESG: "AESG", AESX: "AESX", AECG: "AECG", AECX: "AECX",
+    ILSG: "FLSG", ILSX: "FLSX", ILCG: "FLCG", ILCX: "FLCX",
+    IESG: "FESG", IESX: "FESX", IECG: "FECG", IECX: "FECX",
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- data/cards.js ---- */
+/**
+ * CARDNA 結果カードの配色とレイアウト
+ * ------------------------------------------------------------
+ * 16タイプそれぞれに専用の配色を持たせる。
+ *   bg     : カードの地の色
+ *   fg     : 文字と罫線の色（bg とのコントラスト 4.5 以上。テストで検証）
+ *   accent : 差し色（4文字コードや強調に使う。bg とのコントラスト 3 以上）
+ *
+ * 色相は属性ごとにまとめてある（理詰め＝青、実戦読み＝赤、発想理論＝紫、感覚実戦＝緑）。
+ * 同じ属性の中でも、濃い地と淡い地が交互に並ぶようにしてある。
+ *
+ * LAYOUTS : 属性ごとのカードの組み方（js/card.js で描く）
+ *   spec   … 理詰め：仕様書のような罫線と表で組む
+ *   score  … 実戦読み：スコアボードのような帯と枠で組む
+ *   poster … 発想理論：4文字コードを2×2の大きな文字で組むポスター
+ *   tate   … 感覚実戦：タイプ名を縦書きで大きく置く
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  root.CARDNA.CARD_LAYOUTS = { AL: "spec", AE: "score", FL: "poster", FE: "tate" };
+
+  root.CARDNA.CARD_STYLES = {
+    ALSG: { bg: "#1D3557", fg: "#F1F4F8", accent: "#9CCBD9" },
+    ALSX: { bg: "#DCE6EE", fg: "#14233A", accent: "#2E5E8C" },
+    ALCG: { bg: "#2449A8", fg: "#FFFFFF", accent: "#FFD166" },
+    ALCX: { bg: "#C3D9EC", fg: "#0B2545", accent: "#B23A48" },
+
+    AESG: { bg: "#A8201A", fg: "#FFF3EC", accent: "#FFC9B5" },
+    AESX: { bg: "#F2D7C9", fg: "#4A1A10", accent: "#A8201A" },
+    AECG: { bg: "#E5602F", fg: "#1A0F0B", accent: "#FFFFFF" },
+    AECX: { bg: "#FBE3DC", fg: "#3A1B14", accent: "#C2412D" },
+
+    FLSG: { bg: "#3C1A78", fg: "#F4EEFF", accent: "#F7B32B" },
+    FLSX: { bg: "#E4DAF5", fg: "#2B1450", accent: "#6E3CBF" },
+    FLCG: { bg: "#8E1B55", fg: "#FFF0F6", accent: "#FFD23F" },
+    FLCX: { bg: "#F1D3EA", fg: "#3D0F3A", accent: "#8C2E8C" },
+
+    FESG: { bg: "#14532D", fg: "#ECFDF3", accent: "#F2C14E" },
+    FESX: { bg: "#CDEBD8", fg: "#0F3D2A", accent: "#C4462B" },
+    FECG: { bg: "#0F6B64", fg: "#F0FDFA", accent: "#FDE047" },
+    FECX: { bg: "#DDF5A8", fg: "#1A2E05", accent: "#B4235F" },
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- js/scoring.js ---- */
+/**
+ * CARDNA 診断ロジック（画面に依存しない純粋な関数だけを置く）
+ * ------------------------------------------------------------
+ * - 回答値は「質問文に当てはまる度合い」：+2 〜 -2
+ * - pole が left の質問はそのまま加算（正）、right の質問は符号を反転して加算（負）
+ * - 軸スコアが 0 以上なら左側、0 未満なら右側
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  /** 傾向の強さラベル（|score| / 最大値 の割合で判定。上から順に評価） */
+  var STRENGTH_LEVELS = [
+    { min: 0.7, label: "かなり強い" },
+    { min: 0.45, label: "はっきり" },
+    { min: 0.25, label: "やや" },
+    { min: 0, label: "僅差" },
+  ];
+
+  /** 出題順（質問 id の配列）を作る */
+  function buildOrder(questions, axes, mode) {
+    if (mode === "random") {
+      var ids = questions.map(function (q) { return q.id; });
+      for (var j = ids.length - 1; j > 0; j--) {
+        var k = Math.floor(Math.random() * (j + 1));
+        var tmp = ids[j]; ids[j] = ids[k]; ids[k] = tmp;
+      }
+      return ids;
+    }
+    if (mode !== "interleave") return questions.map(function (q) { return q.id; });
+    var buckets = axes.map(function (a) {
+      return questions.filter(function (q) { return q.axis === a.id; });
+    });
+    var order = [];
+    var longest = Math.max.apply(null, buckets.map(function (b) { return b.length; }));
+    for (var i = 0; i < longest; i++) {
+      buckets.forEach(function (b) { if (b[i]) order.push(b[i].id); });
+    }
+    return order;
+  }
+
+  /** 1問ぶんの寄与（左側を正とした値） */
+  function contribution(question, value) {
+    var v = Number(value) || 0;
+    return question.pole === "right" ? -v : v;
+  }
+
+  function strengthOf(ratio) {
+    var r = Math.abs(ratio);
+    for (var i = 0; i < STRENGTH_LEVELS.length; i++) {
+      if (r >= STRENGTH_LEVELS[i].min) return STRENGTH_LEVELS[i].label;
+    }
+    return STRENGTH_LEVELS[STRENGTH_LEVELS.length - 1].label;
+  }
+
+  /**
+   * 軸ごとのスコアを計算
+   * @param {Object} answers  { questionId: -2..2 }
+   * @returns {Array} 軸ごとの結果
+   */
+  function computeAxes(answers, questions, axes) {
+    return axes.map(function (axis) {
+      var qs = questions.filter(function (q) { return q.axis === axis.id; });
+      var max = qs.length * 2;
+      var score = qs.reduce(function (sum, q) {
+        return sum + (q.id in answers ? contribution(q, answers[q.id]) : 0);
+      }, 0);
+      var isLeft = score >= 0;
+      // 表示用の割合は平方根カーブで広げる（回答がばらけても 50:50 付近に固まらないように）。
+      // 符号は変わらないので、タイプ判定は従来と同じ。
+      var ratio = max === 0 ? 0 : score / max;
+      var shown = (ratio < 0 ? -1 : 1) * Math.sqrt(Math.abs(ratio));
+      var leftPct = Math.round(((shown + 1) / 2) * 100);
+      var side = isLeft ? axis.left : axis.right;
+      return {
+        id: axis.id,
+        title: axis.title,
+        score: score,
+        max: max,
+        letter: side.letter,
+        side: isLeft ? "left" : "right",
+        sideLabel: side.label,
+        leftPct: leftPct,
+        rightPct: 100 - leftPct,
+        dominantPct: isLeft ? leftPct : 100 - leftPct,
+        strength: strengthOf(shown),
+        left: axis.left,
+        right: axis.right,
+      };
+    });
+  }
+
+  function typeCode(axisResults) {
+    return axisResults.map(function (a) { return a.letter; }).join("");
+  }
+
+  /** 正反対のタイプ（全文字を反転） */
+  function oppositeCode(code, axes) {
+    return code.split("").map(function (ch, i) {
+      var a = axes[i];
+      return ch === a.left.letter ? a.right.letter : a.left.letter;
+    }).join("");
+  }
+
+  /** 全16コードを列挙 */
+  function allCodes(axes) {
+    var codes = [""];
+    axes.forEach(function (a) {
+      var next = [];
+      codes.forEach(function (c) {
+        next.push(c + a.left.letter, c + a.right.letter);
+      });
+      codes = next;
+    });
+    return codes;
+  }
+
+  /** まとめて診断 */
+  function diagnose(answers, data) {
+    var axisResults = computeAxes(answers, data.QUESTIONS, data.AXES);
+    var code = typeCode(axisResults);
+    return { code: code, axes: axisResults, type: data.TYPES[code] || null };
+  }
+
+  root.CARDNA.scoring = {
+    STRENGTH_LEVELS: STRENGTH_LEVELS,
+    buildOrder: buildOrder,
+    contribution: contribution,
+    computeAxes: computeAxes,
+    typeCode: typeCode,
+    oppositeCode: oppositeCode,
+    allCodes: allCodes,
+    diagnose: diagnose,
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- js/card.js ---- */
+/**
+ * CARDNA 結果カードの描画（文字中心のカードデザイン）
+ * ------------------------------------------------------------
+ * 画面表示・シェア画像・OGP画像のすべてで、この1つの描画処理を使う。
+ * 外部ライブラリなし。canvas 2D のみ。座標系は 750 × 1050（63:88 のカード比率）。
+ *
+ * 方針
+ * - 絵柄は使わず、4文字コード・タイプ名・キャッチ・4軸・あるあるの「文字」でカードを組む
+ * - グラデーションや光沢は使わず、ベタの地色・罫線・活字だけで印刷物のように仕上げる
+ * - 配色はタイプごと（data/cards.js の CARD_STYLES）、組み方は属性ごと（CARD_LAYOUTS）
+ *
+ * 共通部分：二重罫の枠、上段（シリーズ名・カード番号）、下段（属性・エディション）
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  var CW = 750, CH = 1050;
+  var X0 = 62, X1 = CW - 62, W = X1 - X0;
+  var DISPLAY = '"Dela Gothic One", "Hiragino Sans", "Yu Gothic", sans-serif';
+  var BODY = '"Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif';
+  var MONO = '"DM Mono", Menlo, monospace';
+
+  // ---------- 色 ----------
+  function hexToRgb(h) { var n = parseInt(h.replace("#", ""), 16); return [(n >> 16) & 255, (n >> 8) & 255, n & 255]; }
+  function luminance(h) {
+    return hexToRgb(h).map(function (v) { v /= 255; return v <= 0.03928 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4); })
+      .reduce(function (s, v, i) { return s + v * [0.2126, 0.7152, 0.0722][i]; }, 0);
+  }
+  function contrast(a, b) { var x = luminance(a), y = luminance(b); return (Math.max(x, y) + 0.05) / (Math.min(x, y) + 0.05); }
+  function mix(h, to, t) {
+    var a = hexToRgb(h), b = hexToRgb(to);
+    return "#" + a.map(function (v, i) { return Math.round(v + (b[i] - v) * t).toString(16).padStart(2, "0"); }).join("");
+  }
+  function rgba(h, a) { var c = hexToRgb(h); return "rgba(" + c.join(",") + "," + a + ")"; }
+
+  /** タイプの配色。dark は bg と fg のうち暗いほう（画面のアクセントに使う） */
+  function styleOf(code) {
+    var D = root.CARDNA, s = (D.CARD_STYLES && D.CARD_STYLES[code]) || { bg: "#16161D", fg: "#FFFFFF", accent: "#FFC83D" };
+    var dark = luminance(s.bg) < luminance(s.fg) ? s.bg : s.fg;
+    var light = dark === s.bg ? s.fg : s.bg;
+    return { bg: s.bg, fg: s.fg, accent: s.accent, dark: dark, light: light, layout: (D.CARD_LAYOUTS || {})[code.slice(0, 2)] || "spec" };
+  }
+
+  // ---------- 文字まわり ----------
+  function rr(ctx, x, y, w, h, r) {
+    ctx.beginPath();
+    ctx.moveTo(x + r, y);
+    ctx.arcTo(x + w, y, x + w, y + h, r);
+    ctx.arcTo(x + w, y + h, x, y + h, r);
+    ctx.arcTo(x, y + h, x, y, r);
+    ctx.arcTo(x, y, x + w, y, r);
+    ctx.closePath();
+  }
+  function setFont(ctx, weight, size, family) { ctx.font = (weight ? weight + " " : "") + size + "px " + family; }
+  /** 幅に収まる最大の文字サイズにする */
+  function fit(ctx, text, weight, family, size, maxW, min) {
+    var s = size;
+    setFont(ctx, weight, s, family);
+    while (s > (min || 12) && ctx.measureText(text).width > maxW) { s -= 2; setFont(ctx, weight, s, family); }
+    return s;
+  }
+  /** 日本語を1文字単位で折り返す（句読点・閉じかっこは行頭に置かない） */
+  function wrap(ctx, text, maxW) {
+    var lines = [], line = "", NO_HEAD = "、。」』）！？ー…";
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i], t = line + ch;
+      if (ctx.measureText(t).width > maxW && line) {
+        if (NO_HEAD.indexOf(ch) !== -1) { lines.push(t); line = ""; continue; }
+        lines.push(line); line = ch;
+      } else line = t;
+    }
+    if (line) lines.push(line);
+    return lines;
+  }
+  /** 行数を超えたら最終行を「…」で切る */
+  function clampLines(ctx, lines, max, maxW) {
+    if (lines.length <= max) return lines;
+    var out = lines.slice(0, max), last = out[max - 1];
+    while (last.length && ctx.measureText(last + "…").width > maxW) last = last.slice(0, -1);
+    out[max - 1] = last + "…";
+    return out;
+  }
+  function paragraph(ctx, text, x, y, maxW, lineH, maxLines) {
+    var lines = clampLines(ctx, wrap(ctx, text, maxW), maxLines, maxW);
+    lines.forEach(function (ln, i) { ctx.fillText(ln, x, y + i * lineH); });
+    return y + (lines.length - 1) * lineH;
+  }
+  function tracked(ctx, px) { if ("letterSpacing" in ctx) ctx.letterSpacing = px + "px"; }
+  function hline(ctx, x, y, w, t, color) { ctx.fillStyle = color; ctx.fillRect(x, y, w, t); }
+
+  // ---------- 共通の枠と上下段 ----------
+  function frame(ctx, o, st) {
+    ctx.fillStyle = st.bg; ctx.fillRect(0, 0, CW, CH);
+    ctx.strokeStyle = st.fg;
+    ctx.lineWidth = 4; ctx.strokeRect(28, 28, CW - 56, CH - 56);
+    ctx.lineWidth = 1.5; ctx.strokeRect(38, 38, CW - 76, CH - 76);
+
+    ctx.fillStyle = st.fg; ctx.textBaseline = "alphabetic";
+    setFont(ctx, "500", 20, MONO); tracked(ctx, 4);
+    ctx.textAlign = "left"; ctx.fillText("CARDNA", X0, 82);
+    ctx.textAlign = "right"; ctx.fillText("No." + String(o.number).padStart(2, "0") + "/" + o.total, X1, 82);
+    tracked(ctx, 0);
+
+    setFont(ctx, "900", 20, BODY);
+    ctx.textAlign = "left"; ctx.fillText(o.family.label, X0, CH - 60);
+    setFont(ctx, "500", 18, MONO); tracked(ctx, 3);
+    ctx.textAlign = "right"; ctx.fillText("CARD GAMER DNA  1ST", X1, CH - 60);
+    tracked(ctx, 0);
+  }
+
+  function axisRows(o) {
+    return o.axesDef.map(function (a, i) {
+      var side = o.code[i] === a.left.letter ? a.left : a.right;
+      return { title: a.title, letter: side.letter, label: side.label, pct: o.axes && o.axes[i] ? o.axes[i].dominantPct : null };
+    });
+  }
+
+  function flavor(ctx, o, st, x, y, w, maxLines, size) {
+    var text = (o.type.aruaru && o.type.aruaru[0]) || "";
+    if (!text) return;
+    ctx.textAlign = "left"; ctx.fillStyle = st.accent; setFont(ctx, "900", 18, BODY); tracked(ctx, 2);
+    ctx.fillText("あるある", x, y); tracked(ctx, 0);
+    ctx.fillStyle = st.fg; setFont(ctx, "700", size || 22, BODY);
+    paragraph(ctx, text, x, y + 34, w, (size || 22) * 1.5, maxLines);
+  }
+
+  function catchCopy(ctx, o, st, x, y, w, align, maxLines) {
+    ctx.fillStyle = st.fg; ctx.textAlign = align || "left";
+    setFont(ctx, "900", 30, BODY);
+    var text = "「" + o.type.catch + "」", lines = wrap(ctx, text, w);
+    if (lines.length > (maxLines || 2)) { setFont(ctx, "900", 26, BODY); lines = wrap(ctx, text, w); }
+    lines = clampLines(ctx, lines, maxLines || 2, w);
+    var ax = align === "center" ? x + w / 2 : x;
+    lines.forEach(function (ln, i) { ctx.fillText(ln, ax, y + i * 44); });
+    return y + (lines.length - 1) * 44;
+  }
+
+  // ---------- レイアウト：仕様書（理詰め） ----------
+  function layoutSpec(ctx, o, st) {
+    ctx.textAlign = "left"; ctx.fillStyle = st.accent; setFont(ctx, "500", 18, MONO); tracked(ctx, 4);
+    ctx.fillText("TYPE CODE", X0, 128); tracked(ctx, 0);
+    ctx.fillStyle = st.fg; fit(ctx, o.code, "", DISPLAY, 200, W, 100);
+    ctx.fillText(o.code, X0 - 4, 300);
+    hline(ctx, X0, 326, W, 10, st.accent);
+    fit(ctx, o.type.name, "", DISPLAY, 96, W, 50); ctx.fillStyle = st.fg;
+    ctx.fillText(o.type.name, X0, 444);
+    catchCopy(ctx, o, st, X0, 502, W, "left", 2);
+
+    var y0 = 576, rowH = 48;
+    hline(ctx, X0, y0, W, 3, st.fg);
+    axisRows(o).forEach(function (r, i) {
+      var y = y0 + i * rowH;
+      ctx.textAlign = "left"; ctx.fillStyle = rgba(st.fg, 0.75); setFont(ctx, "700", 20, BODY); ctx.fillText(r.title, X0, y + 33);
+      ctx.fillStyle = st.accent; setFont(ctx, "", 30, DISPLAY); ctx.fillText(r.letter, X0 + 190, y + 35);
+      ctx.fillStyle = st.fg; setFont(ctx, "900", 26, BODY); ctx.fillText(r.label, X0 + 236, y + 34);
+      if (r.pct != null) { ctx.textAlign = "right"; setFont(ctx, "500", 26, MONO); ctx.fillText(r.pct + "%", X1, y + 34); }
+      hline(ctx, X0, y + rowH, W, 1.5, rgba(st.fg, 0.5));
+    });
+    flavor(ctx, o, st, X0, 812, W, 4, 21);
+  }
+
+  // ---------- レイアウト：スコアボード（実戦読み） ----------
+  function layoutScore(ctx, o, st) {
+    ctx.fillStyle = st.fg; ctx.fillRect(X0, 106, W, 116);
+    ctx.fillStyle = st.bg; ctx.textAlign = "left"; fit(ctx, o.type.name, "", DISPLAY, 88, W - 150, 46);
+    ctx.fillText(o.type.name, X0 + 24, 196);
+    ctx.textAlign = "right"; setFont(ctx, "500", 20, MONO); tracked(ctx, 3); ctx.fillText("TYPE", X1 - 22, 196); tracked(ctx, 0);
+
+    ctx.textAlign = "center"; ctx.fillStyle = st.accent; fit(ctx, o.code, "", DISPLAY, 220, W, 100);
+    ctx.fillText(o.code, CW / 2, 440);
+    catchCopy(ctx, o, st, X0 + 10, 512, W - 20, "center", 2);
+
+    var top = 596, h = 166, gap = 14, bw = (W - gap * 3) / 4;
+    axisRows(o).forEach(function (r, i) {
+      var x = X0 + i * (bw + gap);
+      ctx.strokeStyle = st.fg; ctx.lineWidth = 3; ctx.strokeRect(x, top, bw, h);
+      ctx.textAlign = "center"; ctx.fillStyle = st.fg;
+      setFont(ctx, "", 64, DISPLAY); ctx.fillText(r.letter, x + bw / 2, top + 80);
+      fit(ctx, r.label, "900", BODY, 22, bw - 16, 14); ctx.fillText(r.label, x + bw / 2, top + 116);
+      if (r.pct != null) { ctx.fillStyle = st.accent; setFont(ctx, "500", 24, MONO); ctx.fillText(r.pct + "%", x + bw / 2, top + 148); }
+    });
+    flavor(ctx, o, st, X0, 810, W, 4, 21);
+  }
+
+  // ---------- レイアウト：ポスター（発想理論） ----------
+  function layoutPoster(ctx, o, st) {
+    var top = 104, cw = W / 2, ch = 200;
+    var colors = [st.fg, st.accent, st.accent, st.fg];
+    for (var i = 0; i < 4; i++) {
+      var cx = X0 + (i % 2) * cw, cy = top + Math.floor(i / 2) * ch;
+      ctx.fillStyle = colors[i]; ctx.textAlign = "center"; setFont(ctx, "", 196, DISPLAY);
+      ctx.fillText(o.code[i], cx + cw / 2, cy + ch - 14);
+    }
+    ctx.fillStyle = st.fg;
+    ctx.fillRect(X0 + cw - 1, top + 10, 2, ch * 2 - 20);
+    ctx.fillRect(X0 + 10, top + ch - 1, W - 20, 2);
+
+    ctx.textAlign = "left"; fit(ctx, o.type.name, "", DISPLAY, 92, W, 50); ctx.fillText(o.type.name, X0, 604);
+    catchCopy(ctx, o, st, X0, 654, W, "left", 2);
+    hline(ctx, X0, 724, W, 3, st.fg);
+    axisRows(o).forEach(function (r, i) {
+      var x = X0 + (i % 2) * (W / 2), y = 768 + Math.floor(i / 2) * 44;
+      ctx.textAlign = "left"; ctx.fillStyle = st.accent; setFont(ctx, "", 26, DISPLAY); ctx.fillText(r.letter, x, y);
+      ctx.fillStyle = st.fg; setFont(ctx, "900", 24, BODY); ctx.fillText(r.label, x + 36, y);
+      if (r.pct != null) { ctx.textAlign = "right"; setFont(ctx, "500", 24, MONO); ctx.fillText(r.pct + "%", x + W / 2 - 30, y); }
+    });
+    flavor(ctx, o, st, X0, 852, W, 3, 19);
+  }
+
+  // ---------- レイアウト：縦書き（感覚実戦） ----------
+  function vertical(ctx, text, cx, top, size, step) {
+    var ROTATE = "ー〜…－";
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i], cy = top + i * step;
+      ctx.save(); ctx.translate(cx, cy + size * 0.5);
+      if (ROTATE.indexOf(ch) !== -1) ctx.rotate(Math.PI / 2);
+      ctx.textAlign = "center"; ctx.textBaseline = "middle"; ctx.fillText(ch, 0, 0);
+      ctx.restore();
+    }
+  }
+  function layoutTate(ctx, o, st) {
+    var colX = 540, colW = X1 - colX;
+    ctx.fillStyle = st.fg; ctx.fillRect(colX - 22, 104, 2, 830);
+    var n = o.type.name.length, size = Math.min(132, Math.floor(800 / n * 0.86)), step = Math.min(140, Math.floor(800 / n));
+    setFont(ctx, "", size, DISPLAY); vertical(ctx, o.type.name, colX + colW / 2 - 4, 112, size, step);
+
+    var lw = colX - 22 - 22 - X0;
+    ctx.textAlign = "left"; ctx.fillStyle = st.accent; setFont(ctx, "500", 18, MONO); tracked(ctx, 4);
+    ctx.fillText("TYPE CODE", X0, 128); tracked(ctx, 0);
+    fit(ctx, o.code, "", DISPLAY, 160, lw, 80); ctx.fillText(o.code, X0 - 3, 262);
+    catchCopy(ctx, o, st, X0, 330, lw, "left", 3);
+
+    var y0 = 470, rowH = 50;
+    hline(ctx, X0, y0, lw, 3, st.fg);
+    axisRows(o).forEach(function (r, i) {
+      var y = y0 + i * rowH;
+      ctx.textAlign = "left"; ctx.fillStyle = st.accent; setFont(ctx, "", 28, DISPLAY); ctx.fillText(r.letter, X0, y + 36);
+      ctx.fillStyle = st.fg; setFont(ctx, "900", 24, BODY); ctx.fillText(r.label, X0 + 40, y + 35);
+      if (r.pct != null) { ctx.textAlign = "right"; setFont(ctx, "500", 24, MONO); ctx.fillText(r.pct + "%", X0 + lw, y + 35); }
+      hline(ctx, X0, y + rowH, lw, 1.5, rgba(st.fg, 0.5));
+    });
+    flavor(ctx, o, st, X0, 726, lw, 5);
+  }
+
+  var LAYOUTS = { spec: layoutSpec, score: layoutScore, poster: layoutPoster, tate: layoutTate };
+
+  /**
+   * カードを描く。座標は 750×1050。ctx.translate / scale で位置と大きさを変えてから呼ぶ。
+   * @param {Object} o cardOptions の戻り値
+   */
+  function drawCard(ctx, o) {
+    var st = styleOf(o.code);
+    ctx.save();
+    rr(ctx, 0, 0, CW, CH, 26); ctx.clip();
+    frame(ctx, o, st);
+    (LAYOUTS[st.layout] || layoutSpec)(ctx, o, st);
+    ctx.restore();
+  }
+
+  // ---------- フォント読み込み ----------
+  function loadFonts(texts) {
+    if (typeof document === "undefined" || !document.fonts || !document.fonts.load) return Promise.resolve();
+    var sample = texts.join("");
+    return Promise.all([
+      document.fonts.load("120px " + DISPLAY, sample),
+      document.fonts.load("900 40px " + BODY, sample),
+      document.fonts.load("700 40px " + BODY, sample),
+      document.fonts.load("500 30px " + MONO, "0123456789%CARDNo./ ALSEXGFCTYPEOMIR"),
+    ]).catch(function () {});
+  }
+
+  /** カード描画に必要な情報をまとめる */
+  function cardOptions(code, axes) {
+    var D = root.CARDNA, codes = D.scoring.allCodes(D.AXES);
+    return {
+      code: code, type: D.TYPES[code], family: D.FAMILIES[code.slice(0, 2)], axesDef: D.AXES,
+      axes: axes || null, number: codes.indexOf(code) + 1, total: codes.length,
+    };
+  }
+  function cardTexts(o) {
+    return [o.code, o.type.name, o.type.catch, o.family.label, (o.type.aruaru || [""])[0], "「」…あるある"]
+      .concat(o.axesDef.map(function (a) { return a.title + a.left.label + a.right.label; }));
+  }
+
+  /** 既存の canvas にカードを描く（表示用）。フォント読み込み後にもう一度描き直す */
+  function paint(canvas, code, axes) {
+    var o = cardOptions(code, axes);
+    canvas.width = CW; canvas.height = CH;
+    var draw = function () { var ctx = canvas.getContext("2d"); ctx.clearRect(0, 0, CW, CH); drawCard(ctx, o); };
+    draw();
+    return loadFonts(cardTexts(o)).then(draw);
+  }
+
+  root.CARDNA.card = {
+    WIDTH: CW, HEIGHT: CH,
+    drawCard: drawCard, paint: paint, styleOf: styleOf, contrast: contrast, mix: mix,
+    cardOptions: cardOptions, cardTexts: cardTexts, loadFonts: loadFonts,
+    roundRect: rr, fonts: { DISPLAY: DISPLAY, BODY: BODY, MONO: MONO },
+  };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- js/share-image.js ---- */
+/**
+ * シェア用画像の生成（カードの描画は card.js を使う）
+ * ------------------------------------------------------------
+ * render(result)  … 診断結果のシェア画像（1080×1350, SNS向け 4:5）
+ * renderOg()      … リンクプレビュー用のOGP画像（1200×630）。build時に書き出す
+ */
+(function (root) {
+  root.CARDNA = root.CARDNA || {};
+
+  var W = 1080, H = 1350;
+  var BG = "#0E0E14";
+
+  /** 背景はベタ塗り。絵柄やグラデーションは使わない */
+  function backdrop(ctx, w, h, color) {
+    ctx.fillStyle = color || BG; ctx.fillRect(0, 0, w, h);
+  }
+
+  /**
+   * 結果画像を描く
+   * @param {Object} result  scoring.diagnose の戻り値
+   * @param {string} format  "post"（1080×1350, X・インスタ投稿向け 4:5）／"story"（1080×1920, ストーリーズ向け 9:16）
+   * @returns {Promise<HTMLCanvasElement>}
+   */
+  function render(result, format) {
+    var C = root.CARDNA.card, F = C.fonts, CFG = root.CARDNA.CONFIG || {};
+    var story = format === "story";
+    var w = W, h = story ? 1920 : H;
+    var o = C.cardOptions(result.code, result.axes);
+    var tags = (CFG.HASHTAGS || ["CARDNA"]).map(function (t) { return "#" + t; }).join("  ");
+    var site = (CFG.SITE_URL || "").replace(/^https?:\/\//, "").replace(/\/$/, "");
+    return C.loadFonts(C.cardTexts(o).concat(["あなたのカードゲーマータイプは", tags, "で診断してみよう", site])).then(function () {
+      var c = document.createElement("canvas");
+      c.width = w; c.height = h;
+      var ctx = c.getContext("2d");
+      var st = C.styleOf(o.code);
+      backdrop(ctx, w, h, C.mix(st.dark, "#000000", 0.45));
+
+      // ストーリーズは上下に操作ボタンが重なるので、上250px・下340pxは文字を置かない
+      var headY = story ? 290 : 86, cardY = story ? 322 : 116, scale = story ? 1.12 : 1.04;
+      ctx.textBaseline = "alphabetic"; ctx.textAlign = "center";
+      ctx.fillStyle = "rgba(255,255,255,.85)"; ctx.font = "900 34px " + F.BODY;
+      ctx.fillText("あなたのカードゲーマータイプは", w / 2, headY);
+
+      var cw = C.WIDTH * scale, x = (w - cw) / 2;
+      ctx.fillStyle = st.accent; C.roundRect(ctx, x + 12, cardY + 12, cw, C.HEIGHT * scale, 26 * scale); ctx.fill();
+      ctx.save(); ctx.translate(x, cardY); ctx.scale(scale, scale); C.drawCard(ctx, o); ctx.restore();
+
+      ctx.textAlign = "center"; ctx.fillStyle = "#FFFFFF"; ctx.font = "900 32px " + F.BODY;
+      if (story) {
+        var below = cardY + C.HEIGHT * scale + 64;
+        if (site) {
+          ctx.fillText(tags, w / 2, below);
+          ctx.font = "700 28px " + F.BODY; ctx.fillStyle = "rgba(255,255,255,.8)";
+          ctx.fillText(site + " で診断してみよう", w / 2, below + 42);
+        } else {
+          ctx.fillText(tags + "  で診断してみよう", w / 2, below);
+        }
+      } else {
+        ctx.fillText(tags + "  で診断してみよう", w / 2, h - 42);
+      }
+      return c;
+    });
+  }
+
+  /** OGP画像：ロゴとキャッチ＋扇形に並べたカード3枚 */
+  function renderOg() {
+    var C = root.CARDNA.card, F = C.fonts, OW = 1200, OH = 630;
+    var picks = ["ALSG", "AECG", "FLSG"].map(function (code) { return C.cardOptions(code, null); });
+    var texts = ["CARDNA", "カードナ", "あなたは、どんなカードゲーマー？", "カードゲーマー向け16タイプ診断", "40問・約5分・登録不要"];
+    picks.forEach(function (o) { texts = texts.concat(C.cardTexts(o)); });
+    return C.loadFonts(texts).then(function () {
+      var c = document.createElement("canvas");
+      c.width = OW; c.height = OH;
+      var ctx = c.getContext("2d");
+      backdrop(ctx, OW, OH, BG);
+
+      // 左：文字
+      ctx.textAlign = "left"; ctx.textBaseline = "alphabetic";
+      ctx.fillStyle = "#FFFFFF"; ctx.font = "84px " + F.DISPLAY; ctx.fillText("CARDNA", 70, 170);
+      var lw = ctx.measureText("CARDNA").width;
+      ctx.font = "900 28px " + F.BODY; ctx.fillStyle = "#FFC83D"; ctx.fillText("カードナ", 70 + lw + 20, 166);
+      ctx.fillStyle = "#FFFFFF"; ctx.font = "900 46px " + F.BODY;
+      ctx.fillText("あなたは、", 70, 270);
+      ctx.fillText("どんなカードゲーマー？", 70, 330);
+      ctx.fillStyle = "rgba(255,255,255,.82)"; ctx.font = "900 30px " + F.BODY;
+      ctx.fillText("カードゲーマー向け16タイプ診断", 70, 410);
+      ctx.fillStyle = "#FFC83D"; ctx.font = "700 26px " + F.BODY;
+      ctx.fillText("40問・約5分・登録不要", 70, 460);
+
+      // 右：カード3枚を扇形に
+      var s = 0.46, cw = C.WIDTH * s, ch = C.HEIGHT * s;
+      [[-0.2, 820, 330], [0.2, 1020, 330], [0, 920, 300]].forEach(function (pos, i) {
+        var o = picks[i === 2 ? 0 : i + 1];
+        ctx.save();
+        ctx.translate(pos[1], pos[2]); ctx.rotate(pos[0]);
+        ctx.fillStyle = "#000000"; C.roundRect(ctx, -cw / 2 + 8, -ch / 2 + 8, cw, ch, 26 * s); ctx.fill();
+        ctx.translate(-cw / 2, -ch / 2); ctx.scale(s, s); C.drawCard(ctx, o);
+        ctx.restore();
+      });
+      return c;
+    });
+  }
+
+  root.CARDNA.shareImage = { render: render, renderOg: renderOg, WIDTH: W, HEIGHT: H };
+})(typeof window !== "undefined" ? window : globalThis);
+
+/* ---- js/app.js ---- */
+/**
+ * CARDNA 画面制御
+ * ------------------------------------------------------------
+ * 画面：top（トップ） / quiz（質問） / result（診断結果・タイプ解説）
+ * 状態は localStorage に保存し、リロード後も続きから再開できる。
+ * URL の #ALSG のようなハッシュで、そのタイプの解説を直接開ける。
+ * （旧コードのハッシュ #IESX などは LEGACY_CODE_MAP で新コードへ転送）
+ */
+(function () {
+  "use strict";
+
+  var D = window.CARDNA;
+  var S = D.scoring;
+  var CFG = D.CONFIG || {};
+
+  var ORDER = S.buildOrder(D.QUESTIONS, D.AXES, D.QUESTION_ORDER);
+  var QMAP = {};
+  D.QUESTIONS.forEach(function (q) { QMAP[q.id] = q; });
+  var TOTAL = ORDER.length;
+  var CODES = S.allCodes(D.AXES);
+
+  var state = { answers: {}, index: 0, screen: "top", viewCode: null };
+  var lastResult = null;
+  var advanceTimer = null;
+
+  // ---------- 小物 ----------
+  function $(id) { return document.getElementById(id); }
+  function esc(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+    });
+  }
+  function track(name, params) {
+    try { if (typeof CFG.onEvent === "function") CFG.onEvent(name, params || {}); } catch (e) {}
+  }
+  function familyOf(code) {
+    return D.FAMILIES[code.slice(0, 2)] || { label: "", color: "#16161D", ink: "#FFFFFF" };
+  }
+  function answeredCount() {
+    return ORDER.filter(function (id) { return id in state.answers; }).length;
+  }
+
+  // ---------- 保存 ----------
+  function save() {
+    try {
+      localStorage.setItem(CFG.STORAGE_KEY, JSON.stringify({
+        answers: state.answers, index: state.index, order: ORDER, screen: state.screen === "quiz" || state.screen === "result" ? state.screen : "top",
+      }));
+    } catch (e) { /* 保存できない環境でも動作は続ける */ }
+  }
+  /**
+   * 古い保存キーを削除する。
+   * 質問の改訂で質問IDが変わったため、旧質問への回答は新しい診断に使えない。
+   * 途中のデータが残っていても、新しい診断を最初から始めてもらう。
+   */
+  function migrateStorage() {
+    try {
+      (CFG.LEGACY_STORAGE_KEYS || []).forEach(function (key) { localStorage.removeItem(key); });
+    } catch (e) {}
+  }
+
+  function load() {
+    migrateStorage();
+    try {
+      var raw = localStorage.getItem(CFG.STORAGE_KEY);
+      if (!raw) return;
+      var d = JSON.parse(raw);
+      var answers = {};
+      if (d && d.answers && typeof d.answers === "object") {
+        Object.keys(d.answers).forEach(function (id) {
+          var v = Number(d.answers[id]);
+          if (QMAP[id] && [2, 1, 0, -1, -2].indexOf(v) !== -1) answers[id] = v;
+        });
+      }
+      state.answers = answers;
+      if (Array.isArray(d.order) && d.order.length === TOTAL &&
+          d.order.every(function (id) { return QMAP[id]; }) &&
+          new Set(d.order).size === TOTAL) {
+        setOrder(d.order);
+      }
+      var idx = Number(d.index);
+      state.index = isFinite(idx) ? Math.max(0, Math.min(TOTAL - 1, Math.floor(idx))) : 0;
+      state.screen = d.screen === "result" && answeredCount() === TOTAL ? "result"
+        : d.screen === "quiz" ? "quiz" : "top";
+    } catch (e) {
+      state = { answers: {}, index: 0, screen: "top", viewCode: null };
+    }
+  }
+  /** 出題順を差し替える（window.CARDNA.app.ORDER の参照を保つため配列は作り直さない） */
+  function setOrder(ids) { ORDER.length = 0; Array.prototype.push.apply(ORDER, ids); }
+
+  function clearProgress() {
+    state.answers = {}; state.index = 0;
+    setOrder(S.buildOrder(D.QUESTIONS, D.AXES, D.QUESTION_ORDER));
+    try { localStorage.removeItem(CFG.STORAGE_KEY); } catch (e) {}
+  }
+
+  // ---------- 画面切り替え ----------
+  function show(name) {
+    state.screen = name;
+    ["top", "quiz", "result"].forEach(function (n) { $("screen-" + n).hidden = n !== name; });
+    window.scrollTo(0, 0);
+  }
+
+  // ---------- トップ ----------
+  function renderAxesIntro() {
+    $("axes-list").innerHTML = D.AXES.map(function (a) {
+      return '<li><span class="ax-pair">' + a.left.letter + "<span>/</span>" + a.right.letter + "</span>" +
+        '<span class="ax-title">' + esc(a.title) + "</span>" +
+        '<span class="ax-poles">' + esc(a.left.label) + "（" + a.left.en + "）↔ " + esc(a.right.label) + "（" + a.right.en + "）</span></li>";
+    }).join("");
+  }
+
+  function renderTypesGrid() {
+    $("types-grid").innerHTML = CODES.map(function (code) {
+      var t = D.TYPES[code], f = familyOf(code), st = D.card.styleOf(code);
+      if (!t) return "";
+      return '<button class="mini" type="button" data-code="' + code + '">' +
+        '<span class="mini-top" style="background:' + st.bg + ';color:' + st.fg + '"><span class="mini-code">' + code + '</span><span class="mini-fam">' + esc(f.label) + '</span></span>' +
+        '<span class="mini-body"><span class="mini-name">' + esc(t.name) + '</span><span class="mini-catch">' + esc(t.catch) + "</span></span></button>";
+    }).join("");
+  }
+
+  function renderTop() {
+    var n = answeredCount();
+    var inProgress = n > 0 && n < TOTAL;
+    $("resume-box").hidden = !inProgress;
+    $("resume-progress").textContent = inProgress ? "（" + n + " / " + TOTAL + "）" : "";
+    $("btn-start").textContent = inProgress ? "最初から診断する" : "診断する";
+    show("top");
+  }
+
+  // ---------- 質問 ----------
+  function renderChoices() {
+    $("choices").innerHTML = D.CHOICES.map(function (c) {
+      return '<button class="choice" type="button" data-v="' + c.value + '"><span class="dot" aria-hidden="true"></span><span>' + esc(c.label) + "</span></button>";
+    }).join("");
+  }
+
+  function renderQuestion(direction) {
+    var id = ORDER[state.index];
+    var q = QMAP[id];
+    $("q-current").textContent = state.index + 1;
+    $("q-total").textContent = TOTAL;
+    $("q-no").textContent = "Q." + String(state.index + 1).padStart(2, "0");
+    $("q-text").textContent = q.text;
+    var pct = (answeredCount() / TOTAL) * 100;
+    $("progress-fill").style.width = pct + "%";
+    $("progress").setAttribute("aria-valuenow", String(answeredCount()));
+    $("progress").setAttribute("aria-valuemax", String(TOTAL));
+
+    var cur = state.answers[id];
+    Array.prototype.forEach.call($("choices").children, function (b) {
+      var on = Number(b.dataset.v) === cur && id in state.answers;
+      b.classList.toggle("selected", on);
+      b.setAttribute("aria-pressed", on ? "true" : "false");
+    });
+    $("choices").classList.remove("locked");
+
+    var card = $("q-card");
+    card.classList.remove("enter", "enter-back");
+    void card.offsetWidth;
+    if (direction) card.classList.add(direction === "back" ? "enter-back" : "enter");
+  }
+
+  function startQuiz(fresh) {
+    if (fresh) clearProgress();
+    else {
+      // 未回答の最初の問題から再開
+      var first = ORDER.findIndex(function (id) { return !(id in state.answers); });
+      state.index = first === -1 ? TOTAL - 1 : first;
+    }
+    show("quiz");
+    renderQuestion("next");
+    save();
+    track(fresh ? "quiz_start" : "quiz_resume", { answered: answeredCount() });
+  }
+
+  function answer(value) {
+    if (diagnosing) return;
+    var id = ORDER[state.index];
+    state.answers[id] = value;
+    save();
+    Array.prototype.forEach.call($("choices").children, function (b) {
+      b.classList.toggle("selected", Number(b.dataset.v) === value);
+    });
+    $("choices").classList.add("locked");
+    clearTimeout(advanceTimer);
+    advanceTimer = setTimeout(function () {
+      if (state.index < TOTAL - 1) {
+        state.index++;
+        save();
+        renderQuestion("next");
+      } else if (answeredCount() === TOTAL) {
+        finish();
+      } else {
+        // 念のため：未回答があればそこへ戻す
+        state.index = ORDER.findIndex(function (qid) { return !(qid in state.answers); });
+        renderQuestion("back");
+      }
+    }, CFG.ADVANCE_DELAY_MS || 220);
+  }
+
+  function back() {
+    if (diagnosing) return;
+    clearTimeout(advanceTimer);
+    if (state.index === 0) { save(); renderTop(); return; }
+    state.index--;
+    save();
+    renderQuestion("back");
+  }
+
+  var diagnosing = false;
+  /** 結果カードをタップで回す。連打するほど回転が上乗せされる */
+  var spinAngle = 0;
+  function spinCard() {
+    var card = $("r-card");
+    card.classList.remove("reveal", "drawn");
+    spinAngle += 720;
+    card.style.transition = "transform 1.6s cubic-bezier(.12,.75,.18,1)";
+    card.style.transform = "rotateY(" + spinAngle + "deg)";
+    track("card_spin", {});
+  }
+  /** 約3秒の「診断中」演出 → デッキから1枚引いて結果を出す */
+  function finish() {
+    if (diagnosing) return;
+    state.screen = "result";
+    save();
+    var r = S.diagnose(state.answers, D);
+    track("quiz_complete", { code: r.code });
+    var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    var DURATION = reduce ? 1200 : 3000;
+    var STEPS = ["回答を読み込んでいます", "4つの軸を計算しています", "ステータスを算出しています", "あなたのカードを探しています"];
+    var el = $("diag");
+    diagnosing = true;
+    el.hidden = false;
+    el.className = "diag busy";
+    $("diag-fill").style.width = "0%";
+    $("diag-pct").textContent = "100";
+    var t0 = null;
+    function ease(x) { // 途中で少し溜めてから一気に進む
+      return x < .5 ? 2 * x * x : 1 - Math.pow(-2 * x + 2, 2) / 2;
+    }
+    function frame(ts) {
+      if (t0 === null) t0 = ts;
+      var x = Math.min(1, (ts - t0) / DURATION);
+      var pct = Math.round(ease(x) * 100);
+      $("diag-fill").style.width = pct + "%";
+      $("diag-pct").textContent = String(100 - pct);
+      $("diag-step").textContent = STEPS[Math.min(STEPS.length - 1, Math.floor(x * STEPS.length))];
+      if (x < 1) { requestAnimationFrame(frame); return; }
+      $("diag-step").textContent = "診断完了！ カードを引きます";
+      el.className = "diag draw";
+      setTimeout(function () {
+        renderResult(r, true);           // 結果画面のカードは drawIn で「引いた」動きで登場
+        el.className = "diag out";
+        setTimeout(function () { el.hidden = true; el.className = "diag"; diagnosing = false; }, 350);
+      }, reduce ? 200 : 1380);
+    }
+    requestAnimationFrame(frame);
+  }
+
+  // ---------- 結果 ----------
+  function gaugeHTML(a) {
+    var leftWin = a.side === "left";
+    var strong = a.strength === "かなり強い";
+    return '<div class="g-row">' +
+      '<div class="g-head"><span class="g-title">' + esc(a.title) + '</span><span class="g-strength' + (strong ? " strong" : "") + '">' + esc(a.strength) + "</span></div>" +
+      '<div class="g-poles">' +
+        '<span class="g-pole left' + (leftWin ? " win" : "") + '"><b>' + a.left.letter + "</b><small>" + esc(a.left.label) + "</small></span>" +
+        '<span class="g-pct">' + a.leftPct + " : " + a.rightPct + "</span>" +
+        '<span class="g-pole right' + (!leftWin ? " win" : "") + '"><b>' + a.right.letter + "</b><small>" + esc(a.right.label) + "</small></span>" +
+      "</div>" +
+      '<div class="g-bar" aria-label="' + esc(a.left.label) + " " + a.leftPct + "%、" + esc(a.right.label) + " " + a.rightPct + '%"><div class="g-fill" style="width:' + a.leftPct + '%"></div></div>' +
+      '<p class="g-score mono">スコア ' + (a.score > 0 ? "+" : "") + a.score + "（" + -a.max + "〜+" + a.max + "）</p>" +
+    "</div>";
+  }
+
+  /** 仲のいいタイプ / 刺激を受けるタイプ のボタンと説明 */
+  function renderRelation(id, rel) {
+    var box = $(id).parentNode;
+    var rt = rel && D.TYPES[rel.code];
+    box.hidden = !rt;
+    if (!rt) return;
+    var rs = D.card.styleOf(rel.code);
+    $(id).dataset.code = rel.code;
+    $(id).innerHTML = '<span class="opp-code" style="background:' + rs.bg + ';color:' + rs.fg + '">' + rel.code + '</span><span class="opp-name">' + esc(rt.name) + '</span><span class="opp-go">解説を見る →</span>';
+    $(id + "-note").textContent = rel.note || "";
+  }
+
+  // ---------- 8角形ステータス ----------
+  // 4軸の傾向（0〜1）を混ぜて8つの能力値にする。w のキーは各軸の極（a=分析 f=ひらめき l=理論 e=経験 s=探究 c=協調 g=目標 x=体験）
+  var STATS = [
+    { name: "思考力",   w: { a: .5, l: .3, s: .2 }, msg: "盤面を一手ずつ詰めていく考える力" },
+    { name: "構築力",   w: { l: .4, s: .3, a: .3 }, msg: "勝ち筋から逆算してデッキを組む力" },
+    { name: "探究心",   w: { s: .6, a: .2, l: .2 }, msg: "気になったカードをとことん掘り下げる力" },
+    { name: "勝負強さ", w: { g: .6, e: .2, f: .2 }, msg: "ここ一番で勝ちをもぎ取る力" },
+    { name: "ひらめき", w: { f: .6, e: .2, x: .2 }, msg: "誰も気づかない勝ち筋を見つける力" },
+    { name: "遊び心",   w: { x: .6, f: .2, c: .2 }, msg: "ロマンも面白さも全力で楽しむ力" },
+    { name: "コミュ力", w: { c: .7, x: .3 },        msg: "対戦相手や仲間と場を盛り上げる力" },
+    { name: "柔軟性",   w: { e: .4, f: .3, c: .3 }, msg: "環境や相手に合わせて動きを変える力" },
+  ];
+  function statRank(v) { return v >= 85 ? "S" : v >= 70 ? "A" : v >= 55 ? "B" : v >= 40 ? "C" : "D"; }
+
+  /** axes（診断結果）があればその割合を、なければタイプの代表値（各軸 75:25）を使う */
+  function computeStats(code, axes) {
+    var p = {};
+    D.AXES.forEach(function (ax, i) {
+      var left = axes ? axes[i].leftPct / 100 : (code[i] === ax.left.letter ? .8 : .2);
+      p[ax.left.letter.toLowerCase()] = left;
+      p[ax.right.letter.toLowerCase()] = 1 - left;
+    });
+    return STATS.map(function (st) {
+      var raw = 0;
+      for (var k in st.w) raw += st.w[k] * (p[k] || 0);
+      // 中央(0.5)からの差を広げて 15〜99 に配置。中心を62に置き、低い値ばかりにならないようにする
+      var d = (raw - 0.5) * 2;
+      d = (d < 0 ? -1 : 1) * Math.pow(Math.abs(d), 0.75);
+      var v = Math.max(15, Math.min(99, Math.round(62 + 38 * d)));
+      return { name: st.name, msg: st.msg, value: v, rank: statRank(v) };
+    });
+  }
+
+  function radarSVG(stats) {
+    var cx = 160, cy = 150, R = 96, n = stats.length;
+    function pt(i, r) {
+      var ang = -Math.PI / 2 + (Math.PI * 2 * i) / n;
+      return [cx + r * Math.cos(ang), cy + r * Math.sin(ang)];
+    }
+    function poly(r) { return stats.map(function (_, i) { return pt(i, r).map(function (v) { return v.toFixed(1); }).join(","); }).join(" "); }
+    var max = Math.max.apply(null, stats.map(function (s) { return s.value; }));
+    var out = '<svg class="radar" viewBox="0 0 320 300" role="img" aria-label="' +
+      esc(stats.map(function (s) { return s.name + " " + s.value; }).join("、")) + '">';
+    [.25, .5, .75].forEach(function (f) { out += '<polygon class="ring" points="' + poly(R * f) + '"/>'; });
+    stats.forEach(function (_, i) { var e = pt(i, R); out += '<line class="spoke" x1="' + cx + '" y1="' + cy + '" x2="' + e[0].toFixed(1) + '" y2="' + e[1].toFixed(1) + '"/>'; });
+    out += '<polygon class="ring outer" points="' + poly(R) + '"/>';
+    var area = stats.map(function (s, i) { return pt(i, R * s.value / 100).map(function (v) { return v.toFixed(1); }).join(","); }).join(" ");
+    out += '<polygon class="area radar-area-anim" points="' + area + '"/>';
+    stats.forEach(function (s, i) { var q = pt(i, R * s.value / 100); out += '<circle class="pt" cx="' + q[0].toFixed(1) + '" cy="' + q[1].toFixed(1) + '" r="4"/>'; });
+    stats.forEach(function (s, i) {
+      var L = pt(i, R + 26), dx = L[0] - cx;
+      var anchor = Math.abs(dx) < 8 ? "middle" : (dx > 0 ? "start" : "end");
+      var ox = anchor === "start" ? -8 : anchor === "end" ? 8 : 0;
+      var top = s.value === max ? " top" : "";
+      var y = L[1] + (L[1] < cy - 40 ? -4 : L[1] > cy + 40 ? 6 : 0);
+      out += '<text class="lbl' + top + '" x="' + (L[0] + ox).toFixed(1) + '" y="' + y.toFixed(1) + '" text-anchor="' + anchor + '">' + esc(s.name) + '</text>';
+      out += '<text class="val' + top + '" x="' + (L[0] + ox).toFixed(1) + '" y="' + (y + 15).toFixed(1) + '" text-anchor="' + anchor + '">' + s.value + '</text>';
+    });
+    return out + "</svg>";
+  }
+
+  function renderStats(code, axes) {
+    var stats = computeStats(code, axes);
+    $("r-radar").innerHTML = radarSVG(stats);
+    var best = stats.slice().sort(function (a, b) { return b.value - a.value; })[0];
+    $("r-stat-best").innerHTML = (axes ? "あなたの" : "このタイプの") + "最強ステータスは <b>" + esc(best.name) + "</b>。" + esc(best.msg) + "が光っています。";
+    $("r-stat-grid").innerHTML = stats.map(function (s) {
+      return '<li><span class="s-name">' + esc(s.name) + '</span><span class="s-num">' + s.value + '</span><span class="s-rank ' + s.rank + '">' + s.rank + "</span></li>";
+    }).join("");
+    $("r-stats-h").textContent = axes ? "ゲーマーステータス" : "ゲーマーステータス（タイプの目安）";
+    $("r-stat-note").textContent = axes ? "※ 40問の回答から算出したステータスです" : "※ このタイプの典型的な傾向から出した目安です";
+  }
+
+  function listHTML(items) {
+    return (items || []).map(function (s) { return "<li>" + esc(s) + "</li>"; }).join("");
+  }
+
+  /**
+   * @param {Object} r       diagnose の結果。タイプ解説として開くときは axes が null
+   * @param {Boolean} animate カードめくり演出
+   */
+  function renderResult(r, animate) {
+    var t = r.type;
+    if (!t) { renderTop(); return; }
+    var f = familyOf(r.code);
+    var isDiagnosis = !!r.axes;
+    lastResult = isDiagnosis ? r : lastResult;
+
+    var root = document.documentElement;
+    // 結果画面の色をタイプごとに切り替える（カードの配色と同じ data/cards.js から）
+    var st = D.card.styleOf(r.code);
+    root.style.setProperty("--fam", st.dark);
+    root.style.setProperty("--fam-ink", st.light);
+    root.style.setProperty("--t-bg", st.bg);
+    root.style.setProperty("--t-fg", st.fg);
+    root.style.setProperty("--t-accent", st.accent);
+    $("screen-result").dataset.layout = st.layout;
+
+    $("r-eyebrow").textContent = isDiagnosis ? "あなたのカードゲーマータイプは" : "タイプ解説";
+    $("rc-code").textContent = r.code;
+    $("rc-name").textContent = t.name;
+    $("rc-catch").textContent = "「" + t.catch + "」";
+    $("r-card").setAttribute("aria-label", r.code + " " + t.name + "「" + t.catch + "」のカード");
+    $("r-card").dataset.code = r.code;
+    D.card.paint($("r-card-canvas"), r.code, isDiagnosis ? r.axes : null);
+
+    $("r-gauges-box").hidden = !isDiagnosis;
+    if (isDiagnosis) $("r-gauges").innerHTML = r.axes.map(gaugeHTML).join("");
+    // トップの16タイプ一覧から開いたときは、診断結果ではないのでグラフ類を出さない
+    $("r-stats-box").hidden = !isDiagnosis;
+    if (isDiagnosis) renderStats(r.code, r.axes);
+    $("btn-type-top").hidden = isDiagnosis;
+
+    $("r-desc").textContent = t.desc;
+    $("r-aruaru").innerHTML = listHTML(t.aruaru);
+    $("r-strengths").innerHTML = listHTML(t.strengths);
+    $("r-cautions").innerHTML = listHTML(t.cautions);
+    $("r-play").textContent = t.play;
+    $("r-deck").textContent = t.deck;
+
+    $("r-advice").textContent = t.advice || "";
+    renderRelation("r-good", t.goodWith);
+    renderRelation("r-inspire", t.inspiredBy);
+
+    // 診断結果のときだけシェア。タイプ解説では「診断する」を出す
+    $("share-box").hidden = !isDiagnosis;
+    if (isDiagnosis) { setupShare(); }
+    $("btn-retry").textContent = isDiagnosis ? "最初から診断し直す" : (lastResult ? "自分の結果に戻る" : "診断する");
+    $("btn-retry").dataset.mode = isDiagnosis ? "retry" : (lastResult ? "mine" : "start");
+
+    show("result");
+    var card = $("r-card");
+    spinAngle = 0; card.style.transition = "none"; card.style.transform = "";
+    card.classList.remove("reveal", "drawn");
+    if (animate) { void card.offsetWidth; card.classList.add(isDiagnosis ? "drawn" : "reveal"); }
+  }
+
+  function viewType(code) {
+    if (!D.TYPES[code]) return;
+    state.viewCode = code;
+    track("type_view", { code: code });
+    renderResult({ code: code, axes: null, type: D.TYPES[code] }, true);
+  }
+
+  // ---------- シェア ----------
+  /**
+   * 友達に送る診断ページのURL。
+   * config の SITE_URL（build.py --site-url で入る）を優先し、なければ今開いているページ。
+   * ローカルファイルや開発用プレビューなど、友達が開けないURLのときは空を返す。
+   */
+  function siteUrl() {
+    if (CFG.SITE_URL) return CFG.SITE_URL;
+    var l = window.location;
+    if (!/^https?:$/.test(l.protocol)) return "";
+    if (/(^localhost$|^127\.|^0\.0\.0\.0$|^192\.168\.|^10\.|claudeusercontent\.com$|claude\.ai$)/.test(l.hostname)) return "";
+    return l.origin + l.pathname;
+  }
+
+  function inviteText() {
+    return "カードゲーマー向け16タイプ診断「CARDNA（カードナ）」\nあなたは、どんなカードゲーマー？ 40問・約5分でわかるよ\n" + forLine(siteUrl());
+  }
+
+  /** 「友達にLINEで送る」と「URLをコピー」。公開URLがないときは隠す */
+  function setupInvites() {
+    var url = siteUrl();
+    ["invite-top", "invite-result"].forEach(function (id) {
+      var box = $(id);
+      box.hidden = !url;
+      if (!url) return;
+      box.querySelector(".invite-line").href = "https://line.me/R/share?text=" + encodeURIComponent(inviteText());
+      box.querySelector(".invite-line").addEventListener("click", function () { track("invite_line", { from: id }); });
+      box.querySelector(".invite-copy").addEventListener("click", function () {
+        var status = box.querySelector(".invite-status");
+        function done(ok) { status.textContent = ok ? "URLをコピーしました" : "コピーできませんでした。URL：" + url; }
+        try { navigator.clipboard.writeText(url).then(function () { done(true); track("invite_copy", { from: id }); }, function () { done(false); }); }
+        catch (e) { done(false); }
+      });
+    });
+  }
+
+  /** LINE で開いたときにアプリ内ブラウザではなく通常のブラウザで開くよう、URLに目印を付ける */
+  function forLine(url) { return url ? url + (url.indexOf("?") === -1 ? "?" : "&") + "openExternalBrowser=1" : url; }
+
+  function shareText(r, line) {
+    var lines = [
+      "私のカードゲーマータイプは【" + r.code + "｜" + r.type.name + "】でした！",
+      "「" + r.type.catch + "」",
+      r.axes.map(function (a) { return a.sideLabel + a.dominantPct + "%"; }).join(" / "),
+    ];
+    var tags = (CFG.HASHTAGS || []).map(function (h) { return "#" + h; }).join(" ");
+    if (tags) lines.push(tags);
+    var url = siteUrl();
+    if (url) lines.push(line ? forLine(url) : url);
+    return lines.join("\n");
+  }
+
+  // ---------- 結果画像（保存・シェア） ----------
+  // 画像は結果が出た時点で先に作っておく。保存や共有は「タップした瞬間」に呼ばないと
+  // ブラウザに拒否されることがあるため、タップ時には完成済みの画像を渡すだけにする。
+  var images = {};          // { "FESX:post": { url, blob, file } }
+  var shareFormat = "post";
+
+  function imageKey(r, fmt) { return r.code + ":" + r.axes.map(function (a) { return a.score; }).join(",") + ":" + fmt; }
+
+  function prepareImage(r, fmt) {
+    var key = imageKey(r, fmt);
+    if (images[key]) return images[key].promise;
+    var entry = images[key] = {};
+    entry.promise = D.shareImage.render(r, fmt).then(function (canvas) {
+      entry.url = canvas.toDataURL("image/png");
+      return new Promise(function (resolve) {
+        if (!canvas.toBlob) { resolve(entry); return; }
+        canvas.toBlob(function (blob) {
+          entry.blob = blob;
+          try { entry.file = new File([blob], fileName(r, fmt), { type: "image/png" }); } catch (e) {}
+          resolve(entry);
+        }, "image/png");
+      });
+    });
+    entry.promise.catch(function () { delete images[key]; });
+    return entry.promise;
+  }
+  function readyImage(r, fmt) { var e = images[imageKey(r, fmt)]; return e && e.url ? e : null; }
+  function fileName(r, fmt) { return "cardna-" + r.code + (fmt === "story" ? "-story" : "") + ".png"; }
+
+  function canShareFiles(entry) {
+    try { return !!(entry && entry.file && navigator.canShare && navigator.canShare({ files: [entry.file] })); }
+    catch (e) { return false; }
+  }
+  var IS_TOUCH = typeof window !== "undefined" && window.matchMedia && window.matchMedia("(pointer: coarse)").matches;
+  var IN_APP = /Line\/|FBAN|FBAV|Instagram|Twitter|TwitterAndroid/i.test(navigator.userAgent || "");
+
+  /** ファイルとしてダウンロードする（パソコン・Android 向け） */
+  function download(entry, name) {
+    var href = entry.blob && window.URL && URL.createObjectURL ? URL.createObjectURL(entry.blob) : entry.url;
+    var a = document.createElement("a");
+    a.href = href; a.download = name; a.rel = "noopener";
+    document.body.appendChild(a); a.click(); a.remove();
+    if (href !== entry.url) setTimeout(function () { URL.revokeObjectURL(href); }, 4000);
+  }
+
+  /**
+   * 画像を保存する。スマホでファイル共有に対応していれば共有メニュー（「画像を保存」が選べる）、
+   * それ以外はダウンロード。どちらも完了は確認できないので、成功したとは表示しない。
+   */
+  function saveImage(fmt, statusEl) {
+    var r = lastResult;
+    if (!r) return;
+    var entry = readyImage(r, fmt);
+    if (!entry) { statusEl.textContent = "画像を準備しています。少し待ってからもう一度押してください。"; prepareImage(r, fmt); return; }
+    track("image_save", { code: r.code, format: fmt });
+    if (IS_TOUCH && canShareFiles(entry)) {
+      navigator.share({ files: [entry.file] }).then(function () { statusEl.textContent = ""; }, function () {});
+      statusEl.textContent = "共有メニューから「画像を保存」を選んでください。";
+      return;
+    }
+    try { download(entry, fileName(r, fmt)); statusEl.textContent = "画像のダウンロードを始めました。"; }
+    catch (e) { statusEl.textContent = "保存できませんでした。画像を長押しして保存してください。"; }
+  }
+
+  function setFormat(fmt) {
+    var r = lastResult;
+    shareFormat = fmt;
+    Array.prototype.forEach.call(document.querySelectorAll(".fmt"), function (b) {
+      b.setAttribute("aria-pressed", b.dataset.fmt === fmt ? "true" : "false");
+    });
+    $("share-img").hidden = true; $("share-img-hint").hidden = true;
+    $("share-img-status").hidden = false; $("share-img-status").textContent = "画像を作成中…";
+    prepareImage(r, fmt).then(function (entry) {
+      if (shareFormat !== fmt) return;
+      $("share-img").src = entry.url;
+      $("share-img").hidden = false; $("share-img-hint").hidden = false; $("share-img-status").hidden = true;
+      $("btn-native-share").hidden = !canShareFiles(entry);
+    }).catch(function () {
+      $("share-img-status").textContent = "画像を作成できませんでした。シェア文をお使いください。";
+    });
+  }
+
+  /** 結果画面のシェア欄を中身ごと用意する（診断結果のときだけ表示） */
+  function setupShare() {
+    var r = lastResult;
+    if (!r) return;
+    var text = shareText(r), lineText = shareText(r, true);
+    $("share-text").value = text;
+    $("share-x").href = "https://twitter.com/intent/tweet?text=" + encodeURIComponent(text);
+    $("share-line").href = "https://line.me/R/share?text=" + encodeURIComponent(lineText);
+    $("copy-status").textContent = "";
+    $("inapp-note").hidden = !IN_APP;
+    $("btn-native-share").hidden = true;
+    setFormat(shareFormat);
+    prepareImage(r, shareFormat === "post" ? "story" : "post");
+  }
+
+  /** スマホの共有メニュー（X・インスタ・LINE など）に画像と文章を渡す */
+  function nativeShare() {
+    var r = lastResult, entry = r && readyImage(r, shareFormat);
+    if (!canShareFiles(entry)) return;
+    track("share_native", { code: r.code, format: shareFormat });
+    navigator.share({ files: [entry.file], text: shareText(r) }).catch(function () {});
+  }
+
+  /** リンクを共有：スマホは共有メニュー、使えなければURLをコピー */
+  function shareLink() {
+    var r = lastResult, url = siteUrl();
+    if (!url) { $("copy-status").textContent = "公開URLで開いたときに使えます。"; return; }
+    track("share_link", { code: r ? r.code : "" });
+    var title = "CARDNA（カードナ）カードゲーマー診断";
+    var text = r ? "私のカードゲーマータイプは【" + r.code + "｜" + r.type.name + "】でした！" : "";
+    if (navigator.share) {
+      navigator.share({ title: title, text: text, url: url }).catch(function () {});
+      return;
+    }
+    try {
+      navigator.clipboard.writeText(url).then(function () { $("copy-status").textContent = "リンクをコピーしました"; },
+        function () { $("copy-status").textContent = "URL：" + url; });
+    } catch (e) { $("copy-status").textContent = "URL：" + url; }
+  }
+
+  function copyShare() {
+    var ta = $("share-text");
+    function fallback() {
+      ta.focus(); ta.select();
+      $("copy-status").textContent = "テキストを選択しました。コピーして使ってください。";
+    }
+    try {
+      navigator.clipboard.writeText(ta.value).then(function () {
+        $("copy-status").textContent = "シェア文をコピーしました";
+        track("share_copy", {});
+      }, fallback);
+    } catch (e) { fallback(); }
+  }
+
+  // ---------- イベント ----------
+  function bind() {
+    $("btn-start").addEventListener("click", function () { startQuiz(true); });
+    $("btn-resume").addEventListener("click", function () { startQuiz(false); });
+    $("btn-back").addEventListener("click", back);
+    $("btn-pause").addEventListener("click", function () {
+      clearTimeout(advanceTimer);
+      // 回答直後に押されたときは、次の質問から再開できるよう位置を進めておく
+      var cur = ORDER[state.index];
+      if (cur in state.answers && state.index < TOTAL - 1) state.index++;
+      save();
+      track("quiz_pause", { answered: answeredCount() });
+      renderTop();
+      $("resume-note").textContent = "保存しました。次にこのページを開くと、続きから答えられます。";
+      try { window.scrollTo(0, 0); } catch (e) {}
+    });
+    // アプリの切り替え・画面を閉じるときにも保存（スマホでは pagehide が来ないことがあるため両方）
+    document.addEventListener("visibilitychange", function () { if (document.visibilityState === "hidden") save(); });
+    window.addEventListener("pagehide", save);
+    $("choices").addEventListener("click", function (e) {
+      var b = e.target.closest(".choice");
+      if (b) answer(Number(b.dataset.v));
+    });
+    $("types-grid").addEventListener("click", function (e) {
+      var b = e.target.closest(".mini");
+      if (b) viewType(b.dataset.code);
+    });
+    $("r-good").addEventListener("click", function () { viewType(this.dataset.code); });
+    $("r-inspire").addEventListener("click", function () { viewType(this.dataset.code); });
+    $("btn-retry").addEventListener("click", function () {
+      var mode = this.dataset.mode;
+      if (mode === "mine" && lastResult) { renderResult(lastResult, true); return; }
+      if (mode === "retry") { track("retry", {}); clearProgress(); lastResult = null; }
+      startQuiz(true);
+    });
+    $("btn-types").addEventListener("click", function () {
+      renderTop();
+      var g = $("types-grid");
+      if (g.scrollIntoView) g.scrollIntoView({ block: "start" });
+    });
+    $("btn-copy").addEventListener("click", copyShare);
+    $("btn-native-share").addEventListener("click", nativeShare);
+    $("btn-save").addEventListener("click", function () { saveImage(shareFormat, $("copy-status")); });
+    $("btn-link").addEventListener("click", shareLink);
+    $("r-card").addEventListener("click", spinCard);
+    $("btn-type-top").addEventListener("click", function () {
+      state.viewCode = null;
+      if (location.hash) { try { history.replaceState(null, "", location.pathname + location.search); } catch (e) {} }
+      renderTop();
+    });
+    $("share-x").addEventListener("click", function () { if (lastResult) track("share_x", { code: lastResult.code }); });
+    Array.prototype.forEach.call(document.querySelectorAll(".fmt"), function (b) {
+      b.addEventListener("click", function () { setFormat(b.dataset.fmt); });
+    });
+
+    document.addEventListener("keydown", function (e) {
+      if (state.screen !== "quiz") return;
+      // 1〜5 キーでも回答できる（PC向け）
+      var n = Number(e.key);
+      if (n >= 1 && n <= D.CHOICES.length) answer(D.CHOICES[n - 1].value);
+      else if (e.key === "Backspace" || e.key === "ArrowLeft") back();
+    });
+    window.addEventListener("hashchange", routeHash);
+  }
+
+  function routeHash() {
+    var code = (location.hash || "").replace("#", "").toUpperCase();
+    var legacy = D.LEGACY_CODE_MAP && D.LEGACY_CODE_MAP[code];
+    if (!D.TYPES[code] && legacy && D.TYPES[legacy]) {
+      code = legacy;
+      try { history.replaceState(null, "", "#" + code); } catch (e) {}
+    }
+    if (D.TYPES[code]) { viewType(code); return true; }
+    return false;
+  }
+
+  // ---------- 起動 ----------
+  function init() {
+    renderAxesIntro();
+    renderTypesGrid();
+    setupInvites();
+    renderChoices();
+    bind();
+    load();
+    if (answeredCount() === TOTAL) lastResult = S.diagnose(state.answers, D);
+    if (routeHash()) return;
+    if (state.screen === "result" && lastResult) renderResult(lastResult, false);
+    else if (state.screen === "quiz") { show("quiz"); renderQuestion(null); }
+    else renderTop();
+  }
+
+  try { init(); }
+  catch (e) {
+    // 保存データの破損などで起動できない場合は、保存を消してトップから
+    try { localStorage.removeItem(CFG.STORAGE_KEY); } catch (_) {}
+    state = { answers: {}, index: 0, screen: "top", viewCode: null };
+    try { renderTop(); } catch (_) {}
+    if (window.console) console.error(e);
+  }
+
+  // テスト・拡張用に公開
+  window.CARDNA.app = { state: state, ORDER: ORDER, answer: answer, back: back, getState: function () { return state; } };
+})();
+
+</script>
+
+</body></html>
