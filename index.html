@@ -447,6 +447,36 @@ button { cursor: pointer; }
   55%  { transform: translateY(-14px) rotate(3deg) rotateY(90deg) scale(1.03); }
   100% { transform: none; }
 }
+
+/* ---------- 質問画面：アプリ内ブラウザ（X・LINE）対策 ---------- */
+/* 固定バーの上にすき間ができても、下の質問カードが透けないように上側を地色で塞ぐ */
+.quiz-bar { margin-inline: -18px; padding-inline: 18px; }
+.quiz-bar::before {
+  content: ""; position: absolute; left: 0; right: 0; bottom: 100%; height: 240px;
+  background: var(--paper); pointer-events: none;
+}
+/* 画面の縦が短いとき（Xのアプリ内ブラウザなど）は、スクロールなしで答えられるよう詰める */
+@media (max-height: 760px) {
+  .quiz-bar { padding-block: 8px 8px; gap: 6px 10px; }
+  .btn-back { min-height: 38px; padding: 4px 12px 4px 6px; font-size: 14px; }
+  .btn-pause { min-height: 34px; font-size: 12px; padding: 2px 10px; }
+  .progress-num { font-size: 17px; }
+  .progress { height: 11px; }
+  .quiz-body { gap: 12px; padding-top: 4px; }
+  .q-card { min-height: 0; padding: 14px 16px 16px; gap: 6px; }
+  .q-no { font-size: 12px; }
+  .q-text { font-size: clamp(16px, 4.6vw, 19px); line-height: 1.55; }
+  .choices { gap: 7px; }
+  .choice { min-height: 46px; padding: 4px 14px; font-size: 15px; grid-template-columns: 28px 1fr; gap: 10px; }
+  .choice[data-v="2"] .dot, .choice[data-v="-2"] .dot { width: 24px; height: 24px; }
+  .choice[data-v="1"] .dot, .choice[data-v="-1"] .dot { width: 19px; height: 19px; }
+  .choice[data-v="0"] .dot { width: 13px; height: 13px; }
+}
+@media (max-height: 640px) {
+  .q-card::before { display: none; }
+  .q-text { font-size: 16px; }
+  .choice { min-height: 42px; font-size: 14.5px; }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
