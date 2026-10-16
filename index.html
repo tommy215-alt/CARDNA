@@ -2472,13 +2472,15 @@ button { cursor: pointer; }
   function forLine(url) { return url ? url + (url.indexOf("?") === -1 ? "?" : "&") + "openExternalBrowser=1" : url; }
 
   /**
-   * 結果つきのURL：?r=タイプ&p=4軸の左側の割合（例 ?r=ALSG&p=61-23-69-82）
+   * 結果つきのURL：/タイプ?p=4軸の左側の割合（例 /ALSG?p=61-23-69-82）
    * 開いた人には「友達の結果」として表示し、その下から診断を始められる
    */
   function resultUrl(r) {
     var url = siteUrl();
     if (!url || !r || !r.axes) return url;
-    return url + "?r=" + r.code + "&p=" + r.axes.map(function (a) { return a.leftPct; }).join("-");
+    // タイプ別の入口ページ（/ALSG など。Xのプレビュー画像がタイプごとに出る）→ 開くと /?r=… に移動する
+    var base = url.replace(/[^\/]*$/, "");
+    return base + r.code + "?p=" + r.axes.map(function (a) { return a.leftPct; }).join("-");
   }
   /** URLの ?r= &p= から、表示用の結果を組み立てる（不正な値なら null） */
   function sharedFromUrl() {
