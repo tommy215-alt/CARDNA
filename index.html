@@ -456,18 +456,22 @@ button { cursor: pointer; }
   background: var(--paper); pointer-events: none;
 }
 /* 画面の縦が短いとき（Xのアプリ内ブラウザなど）は、スクロールなしで答えられるよう詰める */
-@media (max-height: 760px) {
-  .quiz-bar { padding-block: 8px 8px; gap: 6px 10px; }
+/* 固定表示をやめる：質問は1画面に収まるので、上に貼り付ける必要がない（アプリ内ブラウザでの重なり対策） */
+.quiz-bar { position: static; }
+.quiz-bar::before { display: none; }
+@media (max-height: 920px) {
+  .quiz-bar { padding-block: 4px 6px; gap: 6px 10px; }
   .btn-back { min-height: 38px; padding: 4px 12px 4px 6px; font-size: 14px; }
   .btn-pause { min-height: 34px; font-size: 12px; padding: 2px 10px; }
   .progress-num { font-size: 17px; }
   .progress { height: 11px; }
   .quiz-body { gap: 12px; padding-top: 4px; }
-  .q-card { min-height: 0; padding: 14px 16px 16px; gap: 6px; }
+  .q-card { min-height: 0; padding: 12px 14px 14px; gap: 4px; box-shadow: var(--shadow-sm); }
   .q-no { font-size: 12px; }
   .q-text { font-size: clamp(16px, 4.6vw, 19px); line-height: 1.55; }
   .choices { gap: 7px; }
-  .choice { min-height: 46px; padding: 4px 14px; font-size: 15px; grid-template-columns: 28px 1fr; gap: 10px; }
+  .choice { min-height: 44px; padding: 3px 14px; font-size: 15px; grid-template-columns: 28px 1fr; gap: 10px; box-shadow: 2px 2px 0 var(--ink); }
+  .choices { gap: 6px; }
   .choice[data-v="2"] .dot, .choice[data-v="-2"] .dot { width: 24px; height: 24px; }
   .choice[data-v="1"] .dot, .choice[data-v="-1"] .dot { width: 19px; height: 19px; }
   .choice[data-v="0"] .dot { width: 13px; height: 13px; }
