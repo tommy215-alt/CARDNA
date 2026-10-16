@@ -336,6 +336,12 @@ button { cursor: pointer; }
   background: var(--hair);
 }
 .g-fill { position: absolute; inset: 0 auto 0 0; background: var(--fam); }
+/* 優っている側だけを色付きにする（右側が優勢なら右から塗る） */
+.g-fill.right { inset: 0 0 0 auto; }
+.g-pole.win b, .g-pole.win small { color: var(--fam); }
+.g-pole:not(.win) { opacity: .45; }
+.g-pct .pw { color: var(--fam); font-weight: 700; font-size: 15px; }
+.g-pct span:not(.pw) { color: var(--muted); }
 .g-bar::after { content: ""; position: absolute; left: 50%; top: -2px; bottom: -2px; border-left: 2px dashed var(--ink); opacity: .55; }
 .g-score { font-size: 11.5px; color: var(--muted); text-align: center; }
 
@@ -481,6 +487,52 @@ button { cursor: pointer; }
   .q-text { font-size: 16px; }
   .choice { min-height: 42px; font-size: 14.5px; }
 }
+
+/* ---------- 結果画面：情報量はそのまま、ひと画面に多く入るよう詰める ---------- */
+#screen-result { line-height: 1.6; }
+#screen-result .r-stage { gap: 8px; padding: 14px 18px 22px; }
+#screen-result .r-eyebrow { font-size: 13.5px; }
+#screen-result .t-card { width: min(80%, 290px); }
+#screen-result .r-stage .type-top { margin-top: 4px; min-height: 46px; }
+#screen-result .share-inline { margin-top: 14px; gap: 8px; }
+#screen-result .r-content { gap: 10px; margin-top: 12px; }
+#screen-result .r-block { padding: 12px 14px 13px; }
+#screen-result .r-h { font-size: 14px; margin-bottom: 6px; }
+#screen-result .r-desc, #screen-result .r-text { font-size: 14px; }
+#screen-result .r-list { font-size: 13.5px; gap: 4px; line-height: 1.55; }
+#screen-result .r-list li { grid-template-columns: 18px 1fr; gap: 6px; }
+#screen-result .aruaru { gap: 6px; }
+#screen-result .aruaru li { font-size: 13.5px; padding: 6px 10px; line-height: 1.5; }
+#screen-result .r-two { gap: 10px; }
+#screen-result .r-small { font-size: 11.5px; margin-top: 4px; }
+/* 4つの軸 */
+#screen-result .gauges { gap: 10px; }
+#screen-result .g-row { gap: 3px; }
+#screen-result .g-head { font-size: 12.5px; }
+#screen-result .g-strength { font-size: 11px; padding: 0 7px; }
+#screen-result .g-pole b { font-size: 16px; }
+#screen-result .g-pole small { font-size: 11px; }
+#screen-result .g-pct { font-size: 12px; }
+#screen-result .g-pct .pw { font-size: 13.5px; }
+#screen-result .g-bar { height: 13px; }
+#screen-result .g-score { font-size: 10.5px; line-height: 1.3; }
+/* ステータス */
+#screen-result .radar-wrap { gap: 8px; }
+#screen-result .radar { max-width: 290px; }
+#screen-result .stat-best { font-size: 13px; padding: 6px 10px; line-height: 1.5; }
+#screen-result .stat-grid { gap: 6px; }
+#screen-result .stat-grid li { padding: 3px 8px; font-size: 12.5px; }
+#screen-result .stat-grid .s-rank { font-size: 13px; width: 22px; }
+/* シェア */
+#screen-result .share-format .fmt { min-height: 36px; font-size: 13px; }
+#screen-result .share-inline .share-img-box img { max-height: 260px; }
+#screen-result .share-buttons { gap: 8px; }
+#screen-result .share-buttons .btn { min-height: 44px; font-size: 14px; padding: 8px 10px; }
+#screen-result .share-text { font-size: 13px; }
+/* 関係タイプ・下部ボタン */
+#screen-result .opp { padding: 7px 10px; gap: 10px; }
+#screen-result .opp-code { font-size: 17px; }
+#screen-result .btn { min-height: 48px; font-size: 15px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -2197,10 +2249,10 @@ button { cursor: pointer; }
       '<div class="g-head"><span class="g-title">' + esc(a.title) + '</span><span class="g-strength' + (strong ? " strong" : "") + '">' + esc(a.strength) + "</span></div>" +
       '<div class="g-poles">' +
         '<span class="g-pole left' + (leftWin ? " win" : "") + '"><b>' + a.left.letter + "</b><small>" + esc(a.left.label) + "</small></span>" +
-        '<span class="g-pct">' + a.leftPct + " : " + a.rightPct + "</span>" +
+        '<span class="g-pct"><span class="' + (leftWin ? "pw" : "") + '">' + a.leftPct + '</span> : <span class="' + (!leftWin ? "pw" : "") + '">' + a.rightPct + "</span></span>" +
         '<span class="g-pole right' + (!leftWin ? " win" : "") + '"><b>' + a.right.letter + "</b><small>" + esc(a.right.label) + "</small></span>" +
       "</div>" +
-      '<div class="g-bar" aria-label="' + esc(a.left.label) + " " + a.leftPct + "%、" + esc(a.right.label) + " " + a.rightPct + '%"><div class="g-fill" style="width:' + a.leftPct + '%"></div></div>' +
+      '<div class="g-bar" aria-label="' + esc(a.left.label) + " " + a.leftPct + "%、" + esc(a.right.label) + " " + a.rightPct + '%"><div class="g-fill' + (leftWin ? "" : " right") + '" style="width:' + a.dominantPct + '%"></div></div>' +
       '<p class="g-score mono">スコア ' + (a.score > 0 ? "+" : "") + a.score + "（" + -a.max + "〜+" + a.max + "）</p>" +
     "</div>";
   }
