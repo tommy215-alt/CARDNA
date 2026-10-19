@@ -533,6 +533,12 @@ button { cursor: pointer; }
 #screen-result .opp { padding: 7px 10px; gap: 10px; }
 #screen-result .opp-code { font-size: 17px; }
 #screen-result .btn { min-height: 48px; font-size: 15px; }
+/* ---------- 診断人数 ---------- */
+.count-badge { margin: 2px 0 0; display: inline-flex; align-items: baseline; gap: 4px; padding: 3px 14px;
+  background: var(--surface); border: 2px solid var(--ink); border-radius: 999px; font-size: 13.5px; font-weight: 700; }
+.count-badge b { font-size: 17px; font-weight: 500; }
+.r-rank { margin: 2px 0 0; font-size: 13px; font-weight: 700; color: inherit; opacity: .92; }
+.r-rank b { font-family: var(--f-mono); font-size: 15px; font-weight: 500; padding-inline: 2px; }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
@@ -552,6 +558,7 @@ button { cursor: pointer; }
       <p class="brand"><span class="brand-mark" aria-label="CARDNA">CAR<span class="brand-d">D</span>NA</span><span class="brand-sub">CARD GAMER DNA ・ カードナ</span></p>
       <h1 id="top-title" class="hero-title">あなたは、<br><span class="nowrap">どんなカードゲーマー？</span></h1>
       <p class="hero-lead">40問であなたのカードゲームスタイルを診断</p>
+      <p id="count-top" class="count-badge" hidden>🃏 これまでに <b id="count-num" class="mono"></b> 人が診断</p>
       <div class="hero-actions">
         <button id="btn-start" class="btn btn-primary btn-xl" type="button">診断する</button>
         <div id="resume-box" class="resume" hidden>
@@ -612,6 +619,7 @@ button { cursor: pointer; }
       <div id="r-card" class="t-card" role="img" aria-label="">
         <canvas id="r-card-canvas" width="750" height="1050"></canvas>
       </div>
+      <p id="r-rank" class="r-rank" hidden></p>
       <button id="btn-try" class="btn btn-primary type-top" type="button" hidden>あなたも診断する（40問・約5分）</button>
       <button id="btn-type-top" class="btn btn-ghost type-top" type="button" hidden>トップに戻る</button>
       <p class="sr-only"><span id="rc-code"></span> <span id="rc-name"></span> <span id="rc-catch"></span></p>
@@ -757,6 +765,8 @@ button { cursor: pointer; }
     HASHTAGS: ["CARDNA", "カードゲーマー診断"],
     /** localStorage のキー。データ構造を大きく変えたら v を上げる */
     STORAGE_KEY: "cardna.progress.v2",
+    /** 診断人数カウンター（Vercel の api/count.js）。空にすると表示しない */
+    COUNT_API: "/api/count",
     /**
      * 移行用：古い保存キー。2026-10 の質問改訂で質問IDが変わったため、
      * 旧質問への回答は引き継がずに削除する（旧ブランド時代の保存キーを含む）。
@@ -2196,6 +2206,48 @@ button { cursor: pointer; }
     renderQuestion("back");
   }
 
+  // ---------- 診断人数カウンター ----------
+  // 失敗しても表示が出ないだけで、診断・結果・シェアには影響しない
+  var COUNTED_KEY = "cardna.counted.v1";   // この端末で数えたかどうか（やり直しでは数えない）
+  var viewingMine = false;
+  function countEnabled() {
+    return !!CFG.COUNT_API && /^https?:$/.test(location.protocol) &&
+      !/(^localhost$|^127\.|claudeusercontent\.com$|claude\.ai$)/.test(location.hostname);
+  }
+  function fmtNum(n) { try { return Number(n).toLocaleString("ja-JP"); } catch (e) { return String(n); } }
+  function showCount(n) {
+    if (!(n > 0)) return;
+    $("count-num").textContent = fmtNum(n);
+    $("count-top").hidden = false;
+  }
+  function myNumber() {
+    try { var v = JSON.parse(localStorage.getItem(COUNTED_KEY) || "null"); return v && v.you > 0 ? v.you : null; }
+    catch (e) { return null; }
+  }
+  function showRank() {
+    var n = viewingMine ? myNumber() : null;
+    $("r-rank").hidden = !n;
+    if (n) $("r-rank").innerHTML = "あなたは <b>" + fmtNum(n) + "</b> 人目の診断者です";
+  }
+  function loadCount() {
+    if (!countEnabled() || !window.fetch) return;
+    fetch(CFG.COUNT_API).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) { if (d) showCount(d.count); }).catch(function () {});
+  }
+  function registerCompletion() {
+    if (!countEnabled() || !window.fetch) return;
+    var done = null;
+    try { done = localStorage.getItem(COUNTED_KEY); } catch (e) {}
+    if (done) return;
+    fetch(CFG.COUNT_API, { method: "POST" }).then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (d) {
+        if (!d) return;
+        if (d.you > 0) { try { localStorage.setItem(COUNTED_KEY, JSON.stringify({ you: d.you, at: Date.now() })); } catch (e) {} }
+        showCount(d.count);
+        showRank();
+      }).catch(function () {});
+  }
+
   var diagnosing = false;
   /** 結果カードをタップで回す。連打するほど回転が上乗せされる */
   var spinAngle = 0;
@@ -2214,6 +2266,7 @@ button { cursor: pointer; }
     save();
     var r = S.diagnose(state.answers, D);
     track("quiz_complete", { code: r.code });
+    registerCompletion();
     var reduce = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     var DURATION = reduce ? 1200 : 3000;
     var STEPS = ["回答を読み込んでいます", "4つの軸を計算しています", "ステータスを算出しています", "あなたのカードを探しています"];
@@ -2388,6 +2441,8 @@ button { cursor: pointer; }
     if (isDiagnosis) renderStats(r.code, r.axes);
     $("btn-type-top").hidden = isDiagnosis;
     $("btn-try").hidden = !isShared;
+    viewingMine = isDiagnosis && !isShared;
+    showRank();
 
     $("r-desc").textContent = t.desc;
     $("r-aruaru").innerHTML = listHTML(t.aruaru);
@@ -2737,6 +2792,7 @@ button { cursor: pointer; }
 
   // ---------- 起動 ----------
   function init() {
+    loadCount();
     renderAxesIntro();
     renderTypesGrid();
     setupInvites();
