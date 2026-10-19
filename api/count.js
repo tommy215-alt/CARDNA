@@ -11,4 +11,38 @@ const KEY = "cardna:completed";
 const LIMIT_PER_10MIN = 30; // 同じ回線から10分間に数えるのは30回まで（連打による水増し対策）
 
 async function redis(commands) {
-  const r = await fetch(REDIS_URL + "/pipeline",
+  const r = await fetch(REDIS_URL + "/pipeline", {
+    method: "POST",
+    headers: { Authorization: "Bearer " + REDIS_TOKEN, "Content-Type": "application/json" },
+    body: JSON.stringify(commands),
+  });
+  if (!r.ok) throw new Error("redis " + r.status);
+  return (await r.json()).map(function (x) { return x.result; });
+}
+
+module.exports = async function (req, res) {
+  try {
+    if (!REDIS_URL || !REDIS_TOKEN) {
+      res.setHeader("Cache-Control", "no-store");
+      return res.status(503).json({ error: "not configured" });
+    }
+    if (req.method === "POST") {
+      res.setHeader("Cache-Control", "no-store");
+      const ip = String(req.headers["x-forwarded-for"] || "").split(",")[0].trim() || "unknown";
+      const rl = "cardna:rl:" + ip + ":" + Math.floor(Date.now() / 600000);
+      const hits = (await redis([["INCR", rl], ["EXPIRE", rl, "900"]]))[0];
+      if (hits > LIMIT_PER_10MIN) {
+        const cur = (await redis([["GET", KEY]]))[0];
+        return res.status(200).json({ count: OFFSET + Number(cur || 0), you: null });
+      }
+      const n = (await redis([["INCR", KEY]]))[0];
+      return res.status(200).json({ count: OFFSET + n, you: OFFSET + n });
+    }
+    const cur = (await redis([["GET", KEY]]))[0];
+    res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=600");
+    return res.status(200).json({ count: OFFSET + Number(cur || 0) });
+  } catch (e) {
+    res.setHeader("Cache-Control", "no-store");
+    return res.status(500).json({ error: "count unavailable" });
+  }
+};
