@@ -3,7 +3,7 @@
 //   POST /api/count → { count, you }   … 診断完了時に +1（you = あなたは何人目か）
 
 // ▼ カウンター設置前に診断した人数の目安。この数字だけ変えれば表示に上乗せされます
-const OFFSET = 0;
+const OFFSET = 10504;
 
 const REDIS_URL = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
 const REDIS_TOKEN = process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN;
